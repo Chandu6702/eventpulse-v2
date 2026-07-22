@@ -12,7 +12,7 @@ Internet → ALB (public subnets)
 ## Why this stack is written but not applied
 
 This repository is a portfolio project. The stack validates (`terraform init
--backend=false && terraform validate`, enforced in CI) and mirrors the local
+-backend=false && terraform validate`) and mirrors the local
 `docker-compose.prod.yml` topology one-to-one, but it is intentionally **not
 deployed**: running it 24/7 costs roughly **$70–90/month** (ALB ~$22, 3 Fargate
 tasks ~$30, RDS db.t4g.micro ~$13, storage/traffic on top) — not worth it for a
