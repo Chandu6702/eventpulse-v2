@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: eventpulse-api
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/eventpulse}
+    username: ${DB_USERNAME:eventpulse}
+    password: ${DB_PASSWORD:eventpulse}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  docker:
+    compose:
+      file: ../docker-compose.yml
+      skip:
+        in-tests: true
+
+server:
+  port: 8080
+  error:
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+app:
+  security:
+    jwt:
+      # HS256 signing key. Override in any real environment.
+      secret: ${JWT_SECRET:dev-only-signing-secret-change-me-0123456789abcdef}
+      access-token-ttl: ${JWT_ACCESS_TTL:15m}
+      refresh-token-ttl: ${JWT_REFRESH_TTL:30d}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  booking:
+    # How long a pending order holds inventory before it is released.
+    hold-duration: ${BOOKING_HOLD_DURATION:10m}
