@@ -53,12 +53,42 @@ flowchart LR
 
 ## Run it locally
 
-Prerequisites: JDK 21+, Node 20+, Docker.
+Prerequisites: JDK 21+ and Node 18+. **No secrets or env vars are required** —
+dev defaults for the database credentials and the JWT signing secret are baked
+into `application.yml`; environment variables only matter for real deployments.
+
+### Option A — Docker provides the database
+
+With Docker Desktop running, the API starts its own Postgres via
+docker-compose:
 
 ```bash
-# API on :8080 — Postgres starts automatically via docker-compose
 cd backend && ./mvnw spring-boot:run
 ```
+
+### Option B — your own PostgreSQL install (no Docker)
+
+Create the dev database once:
+
+```sql
+CREATE USER eventpulse WITH PASSWORD 'eventpulse';
+CREATE DATABASE eventpulse OWNER eventpulse;
+```
+
+Then run with the compose integration switched off:
+
+```bash
+cd backend && SPRING_DOCKER_COMPOSE_ENABLED=false ./mvnw spring-boot:run
+```
+
+In IntelliJ: run `EventpulseApiApplication` with the environment variable
+`SPRING_DOCKER_COMPOSE_ENABLED=false` in the run configuration. If your
+Postgres uses different credentials, also set `DB_URL`, `DB_USERNAME`,
+`DB_PASSWORD`. Flyway migrates the schema automatically on first start either
+way.
+
+> Note: the integration tests (Testcontainers) always need Docker — they spin
+> up their own throwaway Postgres. Running the app does not.
 
 ```bash
 # SPA on :5173, proxying /api to :8080
