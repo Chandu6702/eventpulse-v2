@@ -1,5 +1,7 @@
 # EventPulse v2
 
+[![CI](https://github.com/Chandu6702/eventpulse-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/Chandu6702/eventpulse-v2/actions/workflows/ci.yml)
+
 Event ticketing platform built around the hard parts of ticketing: **selling
 the last 10 tickets to 500 people at once without overselling**, idempotent
 checkout, QR gate check-in, and waitlists.
