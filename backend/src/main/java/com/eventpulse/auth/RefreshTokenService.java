@@ -49,9 +49,13 @@ public class RefreshTokenService {
      * Validates the presented token and rotates it: the old token is revoked
      * and a fresh one is issued atomically.
      *
+     * <p>noRollbackFor is load-bearing: when reuse is detected we revoke the
+     * whole token family and then throw 401 — without it, the rollback
+     * triggered by the exception would silently undo the revocation.
+     *
      * @return the rotated raw token together with its owner
      */
-    @Transactional
+    @Transactional(noRollbackFor = UnauthorizedException.class)
     public RotationResult rotate(String rawToken) {
         RefreshToken current = refreshTokenRepository.findByTokenHash(hash(rawToken))
                 .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));

@@ -60,7 +60,9 @@ public class AuthService {
         return buildResult(user);
     }
 
-    @Transactional
+    // noRollbackFor: reuse detection inside rotate() must keep its
+    // family-revocation write even though the request ends in a 401.
+    @Transactional(noRollbackFor = UnauthorizedException.class)
     public AuthResult refresh(String rawRefreshToken) {
         if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
             throw new UnauthorizedException("Missing refresh token");
