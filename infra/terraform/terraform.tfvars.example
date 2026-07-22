@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars and fill in before applying.
+# terraform.tfvars is gitignored — never commit real values.
+
+region      = "ap-south-1"
+api_image   = "<account>.dkr.ecr.ap-south-1.amazonaws.com/eventpulse-api:v1"
+web_image   = "<account>.dkr.ecr.ap-south-1.amazonaws.com/eventpulse-web:v1"
+db_password = "change-me-strong-password"
+jwt_secret  = "change-me-32-plus-character-signing-secret"
