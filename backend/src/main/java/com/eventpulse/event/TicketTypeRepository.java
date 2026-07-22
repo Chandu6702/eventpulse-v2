@@ -41,4 +41,12 @@ public interface TicketTypeRepository extends JpaRepository<TicketType, UUID> {
     @Query("update TicketType t set t.held = t.held - :quantity "
             + "where t.id = :id and t.held >= :quantity")
     int releaseHold(@Param("id") UUID id, @Param("quantity") int quantity);
+
+    /**
+     * Availability straight from the database. Unlike findById this bypasses
+     * the persistence context, so it observes bulk-update queries (tryHold /
+     * releaseHold) executed earlier in the same transaction.
+     */
+    @Query("select t.capacity - t.sold - t.held from TicketType t where t.id = :id")
+    Integer availableOf(@Param("id") UUID id);
 }

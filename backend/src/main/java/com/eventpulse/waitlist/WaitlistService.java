@@ -61,20 +61,22 @@ public class WaitlistService {
     }
 
     /**
-     * Invoked whenever a hold is released. Runs in its own transaction so a
-     * failed promotion can never roll back the release that triggered it.
-     * In production the "notification" would be an email/push; here it flips
-     * the entry to NOTIFIED, which the UI surfaces as "your turn".
+     * Invoked whenever a hold is released, inside the releasing transaction —
+     * promotion and release commit or roll back together. Availability is
+     * read with a scalar query because the release was a bulk update the
+     * persistence context has not seen. In production the "notification"
+     * would go through an outbox to email/push; here it flips the entry to
+     * NOTIFIED, which the UI surfaces as "your turn".
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.MANDATORY)
     public void notifyInventoryReleased(UUID ticketTypeId) {
-        TicketType ticketType = ticketTypeRepository.findById(ticketTypeId).orElse(null);
-        if (ticketType == null || ticketType.available() <= 0) {
+        Integer available = ticketTypeRepository.availableOf(ticketTypeId);
+        if (available == null || available <= 0) {
             return;
         }
 
         List<WaitlistEntry> next = waitlistRepository.findOldestWaitingForUpdate(
-                ticketTypeId, PageRequest.of(0, ticketType.available()));
+                ticketTypeId, PageRequest.of(0, available));
         next.forEach(entry -> {
             entry.markNotified();
             log.info("Waitlist promotion: user {} notified for ticket type {}",
