@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Map;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,6 +24,14 @@ class AuthFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private TestRestTemplate rest;
+
+    @BeforeEach
+    void useCookielessClient() {
+        // The default client keeps a cookie jar, which would silently attach
+        // the *newest* refresh token to requests that deliberately replay an
+        // old one. Rotation tests need full manual control over cookies.
+        rest.getRestTemplate().setRequestFactory(new SimpleClientHttpRequestFactory());
+    }
 
     @Test
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -91,7 +101,9 @@ class AuthFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     private String refreshCookie(ResponseEntity<?> response) {
-        return response.getHeaders().getValuesAsList(HttpHeaders.SET_COOKIE).stream()
+        // Raw header values — getValuesAsList would split on the comma
+        // inside the cookie's Expires date and truncate the header.
+        return response.getHeaders().getOrEmpty(HttpHeaders.SET_COOKIE).stream()
                 .filter(cookie -> cookie.startsWith("refresh_token="))
                 .findFirst()
                 .orElseThrow();
