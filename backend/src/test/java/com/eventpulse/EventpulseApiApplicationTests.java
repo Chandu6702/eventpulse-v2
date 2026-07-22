@@ -1,13 +1,12 @@
 package com.eventpulse;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class EventpulseApiApplicationTests {
+class EventpulseApiApplicationTests extends AbstractIntegrationTest {
 
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void contextLoads() {
+        // Boots the full application context against a real PostgreSQL
+        // container, including Flyway migrations.
+    }
 }
