@@ -11,6 +11,22 @@ This is a ground-up re-architecture of [EventPulse v1](https://github.com/Chandu
 project from CRUD into a concurrency problem, and that drove the move to
 Java/Spring + PostgreSQL.
 
+## What it does
+
+- **Attendees** browse events (covers, search, categories), book with a
+  10-minute inventory hold, pay (simulated gateway), get QR tickets, join
+  waitlists, and see personal analytics of what they attend and spend.
+- **Organizers** create and publish events (uploaded cover images are
+  compressed in the browser; custom labels for the "Other" category), track a
+  live dashboard — tickets/day chart, per-event sales pulse, revenue,
+  attendance — and run gate check-in via hardware QR scanner, phone camera,
+  or manual code entry. An attendee can upgrade to organizer from their
+  profile; the new role lands via token refresh.
+- **Optional AI insights** (Claude) turn the analytics numbers into
+  plain-language observations; without an API key the endpoints return
+  204 and the dashboard simply shows numbers.
+- Light/dark theme, responsive down to phones.
+
 ## Architecture
 
 ```mermaid
@@ -40,14 +56,14 @@ flowchart LR
 | Abandoned checkouts hoarding tickets | Pending orders hold inventory for 10 min; a scheduled sweeper expires them (each in its own transaction) and releases the holds. |
 | Confirm/expire race | Both paths lock the order row first (`SELECT … FOR UPDATE`); state transitions are checked under the lock. |
 | Deadlocks on multi-item orders | Items are processed in deterministic ticket-type order in every transaction. |
-| Same QR scanned at two gates | Locked ticket lookup — exactly one scan wins, the other gets the original check-in time. |
+| Same QR scanned at two gates | Locked ticket lookup — exactly one scan wins, the other gets the original check-in time. Scans are also scoped to the gate's event, so a valid ticket for the hall next door is refused without being consumed. |
 | Stolen refresh tokens | Tokens are opaque, stored as SHA-256 hashes, rotated on every use; reusing a rotated token revokes the whole session family. |
 | Sold-out demand | Waitlist with row-locked FIFO promotion when inventory is released. |
 
 ## Stack
 
-**Backend** Java 21 · Spring Boot 4 · Spring Security (OAuth2 resource server, HS256) · Spring Data JPA · PostgreSQL 17 · Flyway
-**Frontend** React 19 · TypeScript · Vite · TanStack Query · Tailwind CSS 4
+**Backend** Java 21 · Spring Boot 4 · Spring Security (OAuth2 resource server, HS256) · Spring Data JPA · PostgreSQL 17 · Flyway · Anthropic SDK (optional AI insights)
+**Frontend** React 19 · TypeScript · Vite · TanStack Query · Tailwind CSS 4 · qr-scanner (camera check-in)
 **Testing** JUnit 5 · Testcontainers (real PostgreSQL in tests)
 **Infra** Docker · GitHub Actions · Terraform (AWS ECS Fargate + RDS + ALB — [validated but intentionally not deployed](infra/terraform/README.md))
 
