@@ -35,4 +35,15 @@ public class UserService {
         user.setName(request.name().trim());
         return UserResponse.from(user);
     }
+
+    /**
+     * Attendee -> organizer upgrade. The client must refresh its access
+     * token afterwards so the new role lands in the JWT.
+     */
+    @Transactional
+    public UserResponse becomeOrganizer(UUID userId) {
+        User user = getById(userId);
+        user.promoteToOrganizer();
+        return UserResponse.from(user);
+    }
 }

@@ -91,6 +91,13 @@ public class User {
         return role;
     }
 
+    /** Attendees can upgrade themselves; nothing else is self-assignable. */
+    public void promoteToOrganizer() {
+        if (role == Role.ATTENDEE) {
+            role = Role.ORGANIZER;
+        }
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }

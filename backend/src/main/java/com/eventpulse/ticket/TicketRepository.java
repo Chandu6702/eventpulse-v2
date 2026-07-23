@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,12 @@ import jakarta.persistence.LockModeType;
 
 public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
+    /**
+     * Event and ticket type are fetched eagerly here: the response mapping
+     * reads both outside any transaction, and with open-in-view disabled a
+     * lazy proxy would throw instead of loading.
+     */
+    @EntityGraph(attributePaths = { "event", "ticketType" })
     List<Ticket> findByOwnerIdOrderByCreatedAtDesc(UUID ownerId);
 
     /**
