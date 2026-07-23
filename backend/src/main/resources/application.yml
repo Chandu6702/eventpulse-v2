@@ -41,3 +41,11 @@ app:
   booking:
     # How long a pending order holds inventory before it is released.
     hold-duration: ${BOOKING_HOLD_DURATION:10m}
+  ai:
+    # Optional analytics insights. With no api-key the insight endpoints
+    # return 204 and the dashboard shows numbers only.
+    # provider: anthropic (paid) or gemini (free tier at aistudio.google.com)
+    provider: ${AI_PROVIDER:anthropic}
+    api-key: ${AI_API_KEY:}
+    # Blank = the provider's default model.
+    model: ${AI_MODEL:}

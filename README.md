@@ -22,9 +22,13 @@ Java/Spring + PostgreSQL.
   attendance — and run gate check-in via hardware QR scanner, phone camera,
   or manual code entry. An attendee can upgrade to organizer from their
   profile; the new role lands via token refresh.
-- **Optional AI insights** (Claude) turn the analytics numbers into
-  plain-language observations; without an API key the endpoints return
-  204 and the dashboard simply shows numbers.
+- **Optional AI insights** turn the analytics numbers into plain-language
+  observations — provider-switchable between Claude and Google Gemini
+  (free tier; set `AI_PROVIDER=gemini` + `AI_API_KEY`). Without a key the
+  endpoints return 204 and the dashboard simply shows numbers.
+- Payment is a simulated gateway behind a real seam —
+  [docs/PAYMENTS.md](docs/PAYMENTS.md) is the mapped path to Razorpay
+  test mode.
 - Light/dark theme, responsive down to phones.
 
 ## Architecture
