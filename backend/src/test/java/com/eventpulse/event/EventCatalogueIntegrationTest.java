@@ -63,7 +63,7 @@ class EventCatalogueIntegrationTest extends AbstractIntegrationTest {
                 "Remove Organizer", "rm-" + UUID.randomUUID() + "@test.dev", "n/a", Role.ORGANIZER));
 
         var draft = eventService.create(organizer.getId(), new com.eventpulse.event.dto.CreateEventRequest(
-                "Removable", null, EventCategory.WORKSHOP, "Lab", "Pune",
+                "Removable", null, EventCategory.WORKSHOP, "Lab", "Pune", null,
                 Instant.now().plus(5, ChronoUnit.DAYS), Instant.now().plus(6, ChronoUnit.DAYS)));
         var ticketType = eventService.addTicketType(draft.id(), organizer.getId(),
                 new com.eventpulse.event.dto.CreateTicketTypeRequest("Seat", 5000, 10, null, null, null));
