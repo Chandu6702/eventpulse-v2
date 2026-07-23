@@ -52,7 +52,7 @@ jobs:
           npm run build
 
   docker:
-    name: Docker images build
+    name: Docker image build
     runs-on: ubuntu-latest
     needs: [backend, frontend]
     steps:
@@ -60,9 +60,6 @@ jobs:
 
       - name: Build backend image
         run: docker build -t eventpulse-api:ci backend
-
-      - name: Build frontend image
-        run: docker build -t eventpulse-web:ci frontend
 
   terraform:
     name: Terraform validate

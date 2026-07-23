@@ -15,11 +15,6 @@ variable "api_image" {
   type        = string
 }
 
-variable "web_image" {
-  description = "ECR image URI for the nginx-served frontend"
-  type        = string
-}
-
 variable "db_password" {
   description = "Master password for the RDS instance"
   type        = string

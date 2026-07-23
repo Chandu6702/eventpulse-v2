@@ -83,7 +83,7 @@ with matching credentials.
 cd frontend && npm install && npm run dev
 ```
 
-Or the full production-like stack (nginx + api + db):
+Or run the backend containerised (db + api), the way it would ship:
 
 ```bash
 JWT_SECRET=dev-only-secret-0123456789abcdef docker compose -f docker-compose.prod.yml up --build

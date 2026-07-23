@@ -1,13 +1,15 @@
 # EventPulse — AWS infrastructure
 
-Terraform stack for running EventPulse on AWS:
+Terraform stack for running the EventPulse API on AWS:
 
 ```
-Internet → ALB (public subnets)
-             ├── /api/*  → ECS Fargate: eventpulse-api (Spring Boot, ×2)
-             └── /*      → ECS Fargate: eventpulse-web (nginx + React build)
-                               api → RDS PostgreSQL 17 (private subnets)
+SPA → static hosting (Amplify / S3 + CloudFront) — outside this stack
+API: Internet → ALB (public subnets) → ECS Fargate: eventpulse-api (Spring Boot, ×2)
+                                          └→ RDS PostgreSQL 17 (private subnets)
 ```
+
+The frontend compiles to static files, so it belongs on a static host rather
+than in a container — this stack deliberately covers only the API tier.
 
 ## Why this stack is written but not applied
 
@@ -32,10 +34,10 @@ production would want:
 terraform init
 terraform apply \
   -var api_image=<ecr-uri>/eventpulse-api:v1 \
-  -var web_image=<ecr-uri>/eventpulse-web:v1 \
   -var db_password=<strong-password> \
   -var jwt_secret=<32+ char secret>
 ```
 
-Build and push the images to the ECR repositories this stack creates, then
-re-apply so the services pick them up.
+Build and push the API image to the ECR repository this stack creates, then
+re-apply so the service picks it up. Deploy the frontend separately to
+Amplify (or S3 + CloudFront) pointing its `/api` rewrite at the ALB.

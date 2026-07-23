@@ -77,17 +77,16 @@ against a real PostgreSQL container (Testcontainers), not H2 — H2 would
 silently skip the `CHECK` constraint semantics and row-locking behaviour this
 system depends on.
 
-## Frontend hosting: container vs static hosting
+## Frontend hosting: static, not containerised
 
-The SPA compiles to static files, so in a real AWS deployment it would go to
-a static host (Amplify, or S3 + CloudFront) — cheaper, simpler and faster
-than running web containers. The nginx-based frontend image in this repo
-exists for two narrower reasons: it powers the self-contained
-`docker-compose.prod.yml` demo (the stand-in for the intentionally
-not-deployed cloud stack), and it keeps the Terraform ECS topology
-symmetrical for illustration. Knowing that a static host replaces that whole
-tier in production is the point — the container is a demo vehicle, not the
-recommended hosting model.
+The SPA compiles to static files, so it deploys to a static host (Amplify,
+or S3 + CloudFront) — cheaper, simpler and faster than running web
+containers. Only the API ships as a Docker image; there is deliberately no
+frontend Dockerfile or nginx layer in this repo, and the Terraform stack
+covers the API tier only. In development the Vite dev server plays the
+static host's role (including the `/api` proxy that keeps auth cookies
+first-party — the same job a rewrite rule does on Amplify or any static
+host).
 
 ## What I'd change at 10× scale
 

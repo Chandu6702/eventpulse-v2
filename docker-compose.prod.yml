@@ -1,7 +1,8 @@
-# Full-stack composition mirroring the AWS topology in infra/terraform:
-# nginx (frontend + reverse proxy) -> api -> postgres.
+# Containerised backend + database, mirroring the AWS topology in
+# infra/terraform (the SPA deploys to static hosting — Amplify/S3 — and in
+# dev runs via `npm run dev`, which proxies /api to :8080).
 #
-#   docker compose -f docker-compose.prod.yml up --build
+#   JWT_SECRET=some-32-char-secret docker compose -f docker-compose.prod.yml up --build
 #
 services:
   postgres:
@@ -20,22 +21,17 @@ services:
 
   api:
     build: ./backend
+    ports:
+      - '8080:8080'
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/eventpulse
       DB_USERNAME: eventpulse
       DB_PASSWORD: ${DB_PASSWORD:-eventpulse}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in the environment}
-      CORS_ALLOWED_ORIGINS: http://localhost:8081
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
     depends_on:
       postgres:
         condition: service_healthy
-
-  web:
-    build: ./frontend
-    ports:
-      - '8081:80'
-    depends_on:
-      - api
 
 volumes:
   postgres-data:

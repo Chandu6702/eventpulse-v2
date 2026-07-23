@@ -12,11 +12,6 @@ resource "aws_cloudwatch_log_group" "api" {
   retention_in_days = 14
 }
 
-resource "aws_cloudwatch_log_group" "web" {
-  name              = "/ecs/${var.project}-web"
-  retention_in_days = 14
-}
-
 # ---- IAM ----
 
 data "aws_iam_policy_document" "ecs_assume" {
@@ -64,18 +59,8 @@ resource "aws_lb_target_group" "api" {
   }
 }
 
-resource "aws_lb_target_group" "web" {
-  name        = "${var.project}-web"
-  port        = 80
-  protocol    = "HTTP"
-  vpc_id      = aws_vpc.main.id
-  target_type = "ip"
-
-  health_check {
-    path = "/"
-  }
-}
-
+# The SPA is served from static hosting (Amplify / S3 + CloudFront), not a
+# container — the ALB fronts the API only.
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = 80
@@ -83,23 +68,7 @@ resource "aws_lb_listener" "http" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.web.arn
-  }
-}
-
-resource "aws_lb_listener_rule" "api" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 10
-
-  action {
-    type             = "forward"
     target_group_arn = aws_lb_target_group.api.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/api/*", "/actuator/health"]
-    }
   }
 }
 
@@ -140,32 +109,6 @@ resource "aws_ecs_task_definition" "api" {
   ])
 }
 
-resource "aws_ecs_task_definition" "web" {
-  family                   = "${var.project}-web"
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  cpu                      = 256
-  memory                   = 512
-  execution_role_arn       = aws_iam_role.task_execution.arn
-
-  container_definitions = jsonencode([
-    {
-      name      = "web"
-      image     = var.web_image
-      essential = true
-      portMappings = [{ containerPort = 80, protocol = "tcp" }]
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-group         = aws_cloudwatch_log_group.web.name
-          awslogs-region        = var.region
-          awslogs-stream-prefix = "web"
-        }
-      }
-    }
-  ])
-}
-
 resource "aws_ecs_service" "api" {
   name            = "api"
   cluster         = aws_ecs_cluster.main.id
@@ -183,28 +126,6 @@ resource "aws_ecs_service" "api" {
     target_group_arn = aws_lb_target_group.api.arn
     container_name   = "api"
     container_port   = 8080
-  }
-
-  depends_on = [aws_lb_listener.http]
-}
-
-resource "aws_ecs_service" "web" {
-  name            = "web"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.web.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
-
-  network_configuration {
-    subnets          = aws_subnet.public[*].id
-    security_groups  = [aws_security_group.service.id]
-    assign_public_ip = true
-  }
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.web.arn
-    container_name   = "web"
-    container_port   = 80
   }
 
   depends_on = [aws_lb_listener.http]
