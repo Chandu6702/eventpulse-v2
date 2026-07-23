@@ -12,12 +12,6 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
-  docker:
-    compose:
-      file: ../docker-compose.yml
-      skip:
-        in-tests: true
-
 server:
   port: 8080
   error:

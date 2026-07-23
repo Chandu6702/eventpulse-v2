@@ -53,42 +53,30 @@ flowchart LR
 
 ## Run it locally
 
-Prerequisites: JDK 21+ and Node 18+. **No secrets or env vars are required** —
-dev defaults for the database credentials and the JWT signing secret are baked
-into `application.yml`; environment variables only matter for real deployments.
+Prerequisites: JDK 21+, Node 18+, and a PostgreSQL server (a normal local
+install is fine — **Docker is not needed to run the app**). No secrets or env
+vars are required: dev defaults for the database credentials and the JWT
+signing secret are baked into `application.yml`.
 
-### Option A — Docker provides the database
-
-With Docker Desktop running, the API starts its own Postgres via
-docker-compose:
-
-```bash
-cd backend && ./mvnw spring-boot:run
-```
-
-### Option B — your own PostgreSQL install (no Docker)
-
-Create the dev database once:
+One-time database setup (pgAdmin Query Tool or `psql` as the postgres user):
 
 ```sql
 CREATE USER eventpulse WITH PASSWORD 'eventpulse';
 CREATE DATABASE eventpulse OWNER eventpulse;
 ```
 
-Then run with the compose integration switched off:
+Then start the API — Flyway creates the whole schema on first start:
 
 ```bash
-cd backend && SPRING_DOCKER_COMPOSE_ENABLED=false ./mvnw spring-boot:run
+cd backend && ./mvnw spring-boot:run
 ```
 
-In IntelliJ: run `EventpulseApiApplication` with the environment variable
-`SPRING_DOCKER_COMPOSE_ENABLED=false` in the run configuration. If your
-Postgres uses different credentials, also set `DB_URL`, `DB_USERNAME`,
-`DB_PASSWORD`. Flyway migrates the schema automatically on first start either
-way.
+(Or run `EventpulseApiApplication` from IntelliJ — no configuration needed.)
+If your Postgres uses different credentials, override with `DB_URL`,
+`DB_USERNAME`, `DB_PASSWORD` env vars.
 
-> Note: the integration tests (Testcontainers) always need Docker — they spin
-> up their own throwaway Postgres. Running the app does not.
+Prefer Docker for the database instead? `docker compose up -d` starts one
+with matching credentials.
 
 ```bash
 # SPA on :5173, proxying /api to :8080
@@ -109,7 +97,11 @@ from the organizer's *Check-in* console — scanning twice is rejected.
 ## Tests
 
 ```bash
-cd backend && ./mvnw verify   # needs Docker for Testcontainers
+# against your local Postgres (no Docker):
+cd backend && TEST_DB_URL=jdbc:postgresql://localhost:5432/eventpulse_test ./mvnw verify
+
+# or with Docker available, zero setup (what CI does):
+cd backend && ./mvnw verify
 ```
 
 The suite that matters: [`BookingConcurrencyIntegrationTest`](backend/src/test/java/com/eventpulse/order/BookingConcurrencyIntegrationTest.java)

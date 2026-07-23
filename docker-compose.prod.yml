@@ -26,7 +26,6 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-eventpulse}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in the environment}
       CORS_ALLOWED_ORIGINS: http://localhost:8081
-      SPRING_DOCKER_COMPOSE_ENABLED: 'false'
     depends_on:
       postgres:
         condition: service_healthy

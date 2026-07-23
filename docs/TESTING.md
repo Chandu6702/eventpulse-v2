@@ -8,16 +8,26 @@ differently or skips.
 
 ## Running the suite
 
-Requires a running Docker daemon (Testcontainers starts and disposes the
-database automatically).
+Two interchangeable database sources (`AbstractIntegrationTest` picks
+automatically):
+
+**Local PostgreSQL — no Docker.** Create a dedicated test database once
+(`CREATE DATABASE eventpulse_test OWNER eventpulse;`), then:
 
 ```bash
-cd backend && ./mvnw verify
+cd backend && TEST_DB_URL=jdbc:postgresql://localhost:5432/eventpulse_test ./mvnw verify
 ```
 
-Or from IntelliJ IDEA: open the `backend` Maven project and run any class
-under `src/test/java` — the shared container starts once for the whole run
-(singleton-container pattern in `AbstractIntegrationTest`).
+In IntelliJ, set `TEST_DB_URL` once in **Run → Edit Configurations →
+Edit configuration templates → JUnit → Environment variables** — after that,
+right-click → Run on any test class just works. Credentials default to
+`eventpulse`/`eventpulse` (override with `TEST_DB_USERNAME`/`TEST_DB_PASSWORD`).
+Use a separate `eventpulse_test` database so test data never mixes with your
+dev data.
+
+**Testcontainers — needs Docker.** With no `TEST_DB_URL` set, a throwaway
+`postgres:17-alpine` container is started and shared across the whole run
+(singleton-container pattern). This is what CI uses: `./mvnw verify`.
 
 ## What is covered
 

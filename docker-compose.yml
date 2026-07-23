@@ -1,5 +1,5 @@
-# Local development database. The backend's spring-boot-docker-compose
-# integration starts this automatically with `./mvnw spring-boot:run`.
+# Optional: dev database via Docker — `docker compose up -d`.
+# Credentials match the backend's dev defaults.
 services:
   postgres:
     image: postgres:17-alpine
