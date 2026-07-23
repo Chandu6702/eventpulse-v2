@@ -4,6 +4,8 @@ import java.time.Instant;
 
 import com.eventpulse.event.EventCategory;
 
+import org.hibernate.validator.constraints.URL;
+
 import jakarta.validation.constraints.Size;
 
 /**
@@ -15,6 +17,7 @@ public record UpdateEventRequest(
         EventCategory category,
         @Size(max = 200) String venue,
         @Size(max = 100) String city,
+        @URL @Size(max = 500) String imageUrl,
         Instant startsAt,
         Instant endsAt) {
 }

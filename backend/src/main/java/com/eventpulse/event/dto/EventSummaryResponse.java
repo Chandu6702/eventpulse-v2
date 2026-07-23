@@ -13,6 +13,7 @@ public record EventSummaryResponse(
         EventCategory category,
         String venue,
         String city,
+        String imageUrl,
         Instant startsAt,
         Instant endsAt,
         EventStatus status) {
@@ -24,6 +25,7 @@ public record EventSummaryResponse(
                 event.getCategory(),
                 event.getVenue(),
                 event.getCity(),
+                event.getImageUrl(),
                 event.getStartsAt(),
                 event.getEndsAt(),
                 event.getStatus());

@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useTheme } from './theme';
 
@@ -35,6 +35,7 @@ function ThemeToggle() {
 export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isOrganizer = !!user && user.role !== 'ATTENDEE';
 
   return (
@@ -122,7 +123,10 @@ export function Layout() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">
-        <Outlet />
+        {/* keyed by route so every navigation gets a gentle fade-up */}
+        <div key={location.pathname} className="fade-up">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

@@ -97,7 +97,7 @@ public class EventService {
     public EventDetailResponse create(UUID organizerId, CreateEventRequest request) {
         validateSchedule(request.startsAt(), request.endsAt());
         User organizer = userService.getById(organizerId);
-        Event event = eventRepository.save(new Event(
+        Event event = new Event(
                 organizer,
                 request.title().trim(),
                 request.description(),
@@ -105,8 +105,9 @@ public class EventService {
                 request.venue().trim(),
                 request.city() == null ? null : request.city().trim(),
                 request.startsAt(),
-                request.endsAt()));
-        return EventDetailResponse.from(event);
+                request.endsAt());
+        event.setImageUrl(request.imageUrl());
+        return EventDetailResponse.from(eventRepository.save(event));
     }
 
     @Transactional
@@ -127,6 +128,9 @@ public class EventService {
         }
         if (request.city() != null) {
             event.setCity(request.city().trim());
+        }
+        if (request.imageUrl() != null) {
+            event.setImageUrl(request.imageUrl());
         }
         if (request.startsAt() != null) {
             event.setStartsAt(request.startsAt());

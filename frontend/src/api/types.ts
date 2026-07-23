@@ -28,6 +28,7 @@ export interface EventSummary {
   category: EventCategory;
   venue: string;
   city: string | null;
+  imageUrl: string | null;
   startsAt: string;
   endsAt: string;
   status: EventStatus;

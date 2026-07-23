@@ -16,19 +16,49 @@ const CATEGORIES: (EventCategory | '')[] = [
   'OTHER',
 ];
 
+function EventCover({ event, tall = false }: { event: EventSummary; tall?: boolean }) {
+  const height = tall ? 'h-56 sm:h-72' : 'h-36';
+  if (event.imageUrl) {
+    return (
+      <img
+        src={event.imageUrl}
+        alt=""
+        loading="lazy"
+        className={`${height} w-full object-cover`}
+        onError={(e) => {
+          // Broken URL: fall back to the gradient placeholder
+          e.currentTarget.outerHTML = `<div class="${height} w-full bg-gradient-to-br from-orange-500 to-amber-400"></div>`;
+        }}
+      />
+    );
+  }
+  return (
+    <div
+      className={`${height} flex w-full items-center justify-center bg-gradient-to-br from-orange-500 to-amber-400`}
+    >
+      <span className="font-display text-3xl font-bold tracking-widest text-white/60 uppercase">
+        {event.category.slice(0, 4)}
+      </span>
+    </div>
+  );
+}
+
 function EventCard({ event }: { event: EventSummary }) {
   return (
     <Link
       to={`/events/${event.id}`}
-      className="card block p-5 transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md dark:hover:border-orange-500/50"
+      className="card block overflow-hidden p-0 transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md dark:hover:border-orange-500/50"
     >
-      <p className="accent text-xs font-semibold tracking-wide uppercase">{event.category}</p>
-      <h2 className="font-display mt-1 line-clamp-2 text-lg font-semibold">{event.title}</h2>
-      <p className="muted mt-2 text-sm">{formatDateTime(event.startsAt)}</p>
-      <p className="muted text-sm">
-        {event.venue}
-        {event.city ? ` · ${event.city}` : ''}
-      </p>
+      <EventCover event={event} />
+      <div className="p-5">
+        <p className="accent text-xs font-semibold tracking-wide uppercase">{event.category}</p>
+        <h2 className="font-display mt-1 line-clamp-2 text-lg font-semibold">{event.title}</h2>
+        <p className="muted mt-2 text-sm">{formatDateTime(event.startsAt)}</p>
+        <p className="muted text-sm">
+          {event.venue}
+          {event.city ? ` · ${event.city}` : ''}
+        </p>
+      </div>
     </Link>
   );
 }

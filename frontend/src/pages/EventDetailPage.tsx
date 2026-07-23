@@ -121,6 +121,14 @@ export function EventDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
+      {event.imageUrl && (
+        <img
+          src={event.imageUrl}
+          alt=""
+          className="mb-6 h-56 w-full rounded-2xl object-cover sm:h-72"
+          onError={(e) => e.currentTarget.remove()}
+        />
+      )}
       <div className="mb-2 flex items-center gap-3">
         <p className="accent text-xs font-semibold tracking-wide uppercase">{event.category}</p>
         {event.status !== 'PUBLISHED' && <Badge value={event.status} />}

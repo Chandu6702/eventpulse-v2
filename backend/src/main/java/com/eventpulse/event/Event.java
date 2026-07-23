@@ -52,6 +52,9 @@ public class Event {
     @Column(length = 100)
     private String city;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     @Column(name = "starts_at", nullable = false)
     private Instant startsAt;
 
@@ -174,6 +177,14 @@ public class Event {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public Instant getStartsAt() {

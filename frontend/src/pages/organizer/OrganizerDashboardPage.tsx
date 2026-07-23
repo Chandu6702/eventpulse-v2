@@ -21,6 +21,7 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
   const [category, setCategory] = useState<EventCategory>('MEETUP');
   const [venue, setVenue] = useState('');
   const [city, setCity] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
   const [description, setDescription] = useState('');
@@ -33,6 +34,7 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
         category,
         venue,
         city: city || null,
+        imageUrl: imageUrl.trim() || null,
         description: description || null,
         startsAt: new Date(startsAt).toISOString(),
         endsAt: new Date(endsAt).toISOString(),
@@ -85,6 +87,10 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
             <input type="datetime-local" required value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className={inputClass} />
           </label>
         </div>
+        <label className="block text-sm sm:col-span-2">
+          <span className="lbl">Cover image URL (optional)</span>
+          <input type="url" maxLength={500} placeholder="https://images.unsplash.com/..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className={inputClass} />
+        </label>
         <label className="block text-sm sm:col-span-2">
           <span className="lbl">Description</span>
           <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} className={inputClass} />
