@@ -4,10 +4,11 @@ target/
 dist/
 build/
 
-# Environment
+# Environment / local secrets
 .env
 .env.local
 *.env
+local-secrets.properties
 
 # IDE
 .idea/

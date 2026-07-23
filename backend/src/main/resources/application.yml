@@ -2,6 +2,12 @@ spring:
   application:
     name: eventpulse-api
 
+  # Local secrets (real DB credentials etc.) live in a git-ignored file so
+  # they can never be committed. Create backend/local-secrets.properties
+  # with e.g. DB_URL=..., DB_USERNAME=..., DB_PASSWORD=...
+  config:
+    import: optional:file:./local-secrets.properties
+
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/eventpulse}
     username: ${DB_USERNAME:eventpulse}

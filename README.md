@@ -72,8 +72,18 @@ cd backend && ./mvnw spring-boot:run
 ```
 
 (Or run `EventpulseApiApplication` from IntelliJ — no configuration needed.)
-If your Postgres uses different credentials, override with `DB_URL`,
-`DB_USERNAME`, `DB_PASSWORD` env vars.
+
+To point at a different database (other credentials, or a cloud Postgres like
+Supabase), create a git-ignored `backend/local-secrets.properties`:
+
+```properties
+DB_URL=jdbc:postgresql://<host>:5432/<db>
+DB_USERNAME=<user>
+DB_PASSWORD=<password>
+```
+
+Spring loads it automatically; real environments use env vars instead.
+Never put real credentials in `application.yml` — it is public.
 
 Prefer Docker for the database instead? `docker compose up -d` starts one
 with matching credentials.
