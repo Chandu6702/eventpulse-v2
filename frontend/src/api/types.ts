@@ -115,6 +115,50 @@ export interface Page<T> {
   totalPages: number;
 }
 
+export interface DailyCount {
+  date: string;
+  count: number;
+}
+
+export interface CategoryCount {
+  category: string;
+  count: number;
+}
+
+export interface EventStats {
+  eventId: string;
+  title: string;
+  status: EventStatus;
+  startsAt: string;
+  capacity: number;
+  sold: number;
+  checkedIn: number;
+  revenueCents: number;
+  soldLast7Days: number;
+  salesPerDay: DailyCount[];
+}
+
+export interface OrganizerAnalytics {
+  totalEvents: number;
+  ticketsSold: number;
+  revenueCents: number;
+  checkedIn: number;
+  categoryBreakdown: CategoryCount[];
+  events: EventStats[];
+}
+
+export interface PersonalAnalytics {
+  ticketsBought: number;
+  spentCents: number;
+  eventsAttended: number;
+  upcomingTickets: number;
+  categoryBreakdown: CategoryCount[];
+}
+
+export interface Insight {
+  insight: string;
+}
+
 export interface ApiProblem {
   status: number;
   detail: string;

@@ -9,6 +9,8 @@ import { EventDetailPage } from './pages/EventDetailPage';
 import { OrderPage } from './pages/OrderPage';
 import { MyOrdersPage } from './pages/MyOrdersPage';
 import { MyTicketsPage } from './pages/MyTicketsPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
 import { OrganizerDashboardPage } from './pages/organizer/OrganizerDashboardPage';
 import { EventManagePage } from './pages/organizer/EventManagePage';
 import { CheckInPage } from './pages/organizer/CheckInPage';
@@ -39,6 +41,8 @@ export default function App() {
           <Route path="/orders" element={<MyOrdersPage />} />
           <Route path="/orders/:orderId" element={<OrderPage />} />
           <Route path="/tickets" element={<MyTicketsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
         </Route>
         <Route element={<RequireAuth organizer />}>
           <Route path="/organizer" element={<OrganizerDashboardPage />} />

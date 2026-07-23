@@ -37,7 +37,11 @@ export function CheckInPage() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <h1 className="mb-6 text-2xl font-bold tracking-tight">Ticket check-in</h1>
+      <h1 className="page-title mb-1">Ticket check-in</h1>
+      <p className="muted mb-6 text-sm">
+        Point a QR scanner at the attendee's ticket (it types the code and presses Enter), or
+        paste the code manually. Each ticket can be checked in exactly once.
+      </p>
 
       <form onSubmit={handleSubmit} className="flex gap-2">
         <input
@@ -45,12 +49,12 @@ export function CheckInPage() {
           onChange={(e) => setCode(e.target.value)}
           placeholder="Scan or paste ticket code…"
           autoFocus
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 font-mono text-sm focus:border-indigo-500 focus:outline-none"
+          className="input font-mono"
         />
         <button
           type="submit"
           disabled={scan.isPending}
-          className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+          className="btn-primary px-5"
         >
           {scan.isPending ? 'Checking…' : 'Check in'}
         </button>
@@ -59,12 +63,12 @@ export function CheckInPage() {
       <div className="mt-6">
         <ErrorNote message={error} />
         {lastResult && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-            <p className="text-lg font-semibold text-emerald-900">✓ {lastResult.attendeeName}</p>
-            <p className="text-sm text-emerald-800">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+            <p className="text-lg font-semibold text-emerald-900 dark:text-emerald-300">✓ {lastResult.attendeeName}</p>
+            <p className="text-sm text-emerald-800 dark:text-emerald-400">
               {lastResult.ticketTypeName} · {lastResult.eventTitle}
             </p>
-            <p className="mt-1 text-xs text-emerald-700">
+            <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-500">
               Checked in at {formatDateTime(lastResult.checkedInAt)}
             </p>
           </div>

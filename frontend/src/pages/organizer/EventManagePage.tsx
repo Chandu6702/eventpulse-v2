@@ -33,34 +33,33 @@ function AddTicketTypeForm({ eventId, onDone }: { eventId: string; onDone: () =>
     add.mutate();
   }
 
-  const inputClass =
-    'w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none';
+  const inputClass = 'input';
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-3 border-t border-zinc-100 pt-4">
+    <form onSubmit={handleSubmit} className="mt-4 space-y-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
       <ErrorNote message={error} />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <label className="block text-sm">
-          <span className="mb-1 block text-zinc-600">Name</span>
+          <span className="lbl">Name</span>
           <input required maxLength={100} value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="General" />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block text-zinc-600">Price (₹)</span>
+          <span className="lbl">Price (₹)</span>
           <input type="number" min="0" step="1" required value={price} onChange={(e) => setPrice(e.target.value)} className={inputClass} />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block text-zinc-600">Capacity</span>
+          <span className="lbl">Capacity</span>
           <input type="number" min="1" required value={capacity} onChange={(e) => setCapacity(e.target.value)} className={inputClass} />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block text-zinc-600">Per-order limit</span>
+          <span className="lbl">Per-order limit</span>
           <input type="number" min="1" max="50" required value={perOrderLimit} onChange={(e) => setPerOrderLimit(e.target.value)} className={inputClass} />
         </label>
       </div>
       <button
         type="submit"
         disabled={add.isPending}
-        className="rounded-lg border border-indigo-300 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-50"
+        className="btn-outline-accent"
       >
         {add.isPending ? 'Adding…' : 'Add ticket type'}
       </button>
@@ -106,10 +105,10 @@ export function EventManagePage() {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-1 flex items-center gap-3">
-        <h1 className="text-2xl font-bold tracking-tight">{event.title}</h1>
+        <h1 className="page-title">{event.title}</h1>
         <Badge value={event.status} />
       </div>
-      <p className="text-sm text-zinc-500">
+      <p className="muted text-sm">
         {formatDateTime(event.startsAt)} · {event.venue}
         {event.city ? `, ${event.city}` : ''}
       </p>
@@ -124,7 +123,7 @@ export function EventManagePage() {
             type="button"
             disabled={publish.isPending}
             onClick={() => publish.mutate()}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="btn-primary"
           >
             {publish.isPending ? 'Publishing…' : 'Publish event'}
           </button>
@@ -138,26 +137,26 @@ export function EventManagePage() {
                 cancelEvent.mutate();
               }
             }}
-            className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+            className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
           >
             Cancel event
           </button>
         )}
       </div>
 
-      <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold">Ticket types</h2>
+      <div className="card mt-8 p-5">
+        <h2 className="font-display text-lg font-semibold">Ticket types</h2>
         {event.ticketTypes.length === 0 ? (
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="muted mt-2 text-sm">
             Add at least one ticket type before publishing.
           </p>
         ) : (
-          <ul className="mt-2 divide-y divide-zinc-100">
+          <ul className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
             {event.ticketTypes.map((ticketType) => (
               <li key={ticketType.id} className="flex items-center justify-between py-3">
                 <div>
                   <p className="font-medium">{ticketType.name}</p>
-                  <p className="text-sm text-zinc-500">
+                  <p className="muted text-sm">
                     {formatPrice(ticketType.priceCents, ticketType.currency)} ·{' '}
                     {ticketType.available}/{ticketType.capacity} available
                   </p>
@@ -166,7 +165,7 @@ export function EventManagePage() {
                   <button
                     type="button"
                     onClick={() => removeTicketType.mutate(ticketType.id)}
-                    className="text-sm font-medium text-red-600 hover:underline"
+                    className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
                   >
                     Remove
                   </button>

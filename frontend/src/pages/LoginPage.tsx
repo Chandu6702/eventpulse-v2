@@ -30,45 +30,41 @@ export function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <Link to="/" className="mb-6 block text-center text-2xl font-bold text-indigo-700">
-          EventPulse
-        </Link>
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+        <Link
+          to="/"
+          className="font-display mb-6 block text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50"
         >
-          <h1 className="text-lg font-semibold">Welcome back</h1>
+          Event<span className="accent">Pulse</span>
+        </Link>
+        <form onSubmit={handleSubmit} className="card space-y-4 p-6">
+          <h1 className="font-display text-lg font-semibold">Welcome back</h1>
           <ErrorNote message={error} />
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-zinc-700">Email</span>
+            <span className="lbl">Email</span>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 focus:border-indigo-500 focus:outline-none"
+              className="input"
             />
           </label>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-zinc-700">Password</span>
+            <span className="lbl">Password</span>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 focus:border-indigo-500 focus:outline-none"
+              className="input"
             />
           </label>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-lg bg-indigo-600 py-2 font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-          >
+          <button type="submit" disabled={submitting} className="btn-primary w-full py-2">
             {submitting ? 'Logging in…' : 'Log in'}
           </button>
-          <p className="text-center text-sm text-zinc-500">
+          <p className="muted text-center text-sm">
             New here?{' '}
-            <Link to="/register" className="font-medium text-indigo-600">
+            <Link to="/register" className="accent font-medium">
               Create an account
             </Link>
           </p>

@@ -16,10 +16,10 @@ export function MyOrdersPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-6 text-2xl font-bold tracking-tight">My orders</h1>
+      <h1 className="page-title mb-6">My orders</h1>
       {!data || data.content.length === 0 ? (
         <EmptyState title="No orders yet">
-          <Link to="/" className="font-medium text-indigo-600">
+          <Link to="/" className="accent font-medium">
             Browse events
           </Link>
         </EmptyState>
@@ -29,11 +29,11 @@ export function MyOrdersPage() {
             <li key={order.id}>
               <Link
                 to={`/orders/${order.id}`}
-                className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 shadow-sm hover:border-indigo-300"
+                className="card flex items-center justify-between p-4 transition hover:border-indigo-300 dark:hover:border-indigo-500/50"
               >
                 <div>
                   <p className="font-medium">{order.eventTitle}</p>
-                  <p className="text-sm text-zinc-500">{formatDateTime(order.createdAt)}</p>
+                  <p className="muted text-sm">{formatDateTime(order.createdAt)}</p>
                 </div>
                 <div className="text-right">
                   <Badge value={order.status} />

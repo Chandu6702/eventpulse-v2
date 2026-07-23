@@ -46,23 +46,19 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
     create.mutate();
   }
 
-  const inputClass =
-    'w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none';
+  const inputClass = 'input';
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mb-8 space-y-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
-    >
-      <h2 className="text-lg font-semibold">New event</h2>
+    <form onSubmit={handleSubmit} className="card mb-8 space-y-4 p-5">
+      <h2 className="font-display text-lg font-semibold">New event</h2>
       <ErrorNote message={error} />
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm sm:col-span-2">
-          <span className="mb-1 block font-medium text-zinc-700">Title</span>
+          <span className="lbl">Title</span>
           <input required maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">Category</span>
+          <span className="lbl">Category</span>
           <select value={category} onChange={(e) => setCategory(e.target.value as EventCategory)} className={inputClass}>
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -72,32 +68,32 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
           </select>
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">Venue</span>
+          <span className="lbl">Venue</span>
           <input required maxLength={200} value={venue} onChange={(e) => setVenue(e.target.value)} className={inputClass} />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">City</span>
+          <span className="lbl">City</span>
           <input maxLength={100} value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
         </label>
         <div className="grid grid-cols-2 gap-4 sm:col-span-1">
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-zinc-700">Starts</span>
+            <span className="lbl">Starts</span>
             <input type="datetime-local" required value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className={inputClass} />
           </label>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-zinc-700">Ends</span>
+            <span className="lbl">Ends</span>
             <input type="datetime-local" required value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className={inputClass} />
           </label>
         </div>
         <label className="block text-sm sm:col-span-2">
-          <span className="mb-1 block font-medium text-zinc-700">Description</span>
+          <span className="lbl">Description</span>
           <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} className={inputClass} />
         </label>
       </div>
       <button
         type="submit"
         disabled={create.isPending}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+        className="btn-primary"
       >
         {create.isPending ? 'Creating…' : 'Create draft'}
       </button>
@@ -121,11 +117,11 @@ export function OrganizerDashboardPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Your events</h1>
+        <h1 className="page-title">Your events</h1>
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          className="btn-primary"
         >
           {showForm ? 'Close' : 'New event'}
         </button>
@@ -148,11 +144,11 @@ export function OrganizerDashboardPage() {
             <li key={event.id}>
               <Link
                 to={`/organizer/events/${event.id}`}
-                className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 shadow-sm hover:border-indigo-300"
+                className="card flex items-center justify-between p-4 transition hover:border-indigo-300 dark:hover:border-indigo-500/50"
               >
                 <div>
                   <p className="font-medium">{event.title}</p>
-                  <p className="text-sm text-zinc-500">
+                  <p className="muted text-sm">
                     {formatDateTime(event.startsAt)} · {event.venue}
                   </p>
                 </div>

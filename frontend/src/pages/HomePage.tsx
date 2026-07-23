@@ -20,14 +20,12 @@ function EventCard({ event }: { event: EventSummary }) {
   return (
     <Link
       to={`/events/${event.id}`}
-      className="block rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-indigo-300 hover:shadow"
+      className="card block p-5 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:hover:border-indigo-500/50"
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-indigo-600">
-        {event.category}
-      </p>
-      <h2 className="mt-1 line-clamp-2 text-lg font-semibold">{event.title}</h2>
-      <p className="mt-2 text-sm text-zinc-500">{formatDateTime(event.startsAt)}</p>
-      <p className="text-sm text-zinc-500">
+      <p className="accent text-xs font-semibold tracking-wide uppercase">{event.category}</p>
+      <h2 className="font-display mt-1 line-clamp-2 text-lg font-semibold">{event.title}</h2>
+      <p className="muted mt-2 text-sm">{formatDateTime(event.startsAt)}</p>
+      <p className="muted text-sm">
         {event.venue}
         {event.city ? ` · ${event.city}` : ''}
       </p>
@@ -48,6 +46,15 @@ export function HomePage() {
 
   return (
     <div>
+      <div className="mb-8">
+        <h1 className="font-display text-3xl font-bold tracking-tight">
+          What's <span className="accent">on</span>?
+        </h1>
+        <p className="muted mt-1 text-sm">
+          Discover conferences, meetups and concerts near you — and grab a ticket in seconds.
+        </p>
+      </div>
+
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <form
           className="flex flex-1 gap-2"
@@ -61,12 +68,9 @@ export function HomePage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search events or venues…"
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+            className="input"
           />
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
+          <button type="submit" className="btn-primary">
             Search
           </button>
         </form>
@@ -76,7 +80,7 @@ export function HomePage() {
             setPage(0);
             setCategory(e.target.value as EventCategory | '');
           }}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:outline-none"
+          className="input sm:w-44"
         >
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>
@@ -103,18 +107,18 @@ export function HomePage() {
                 type="button"
                 disabled={page === 0}
                 onClick={() => setPage((p) => p - 1)}
-                className="rounded-md border border-zinc-300 px-3 py-1.5 disabled:opacity-40"
+                className="btn-ghost px-3 py-1.5 disabled:opacity-40"
               >
                 Previous
               </button>
-              <span className="text-zinc-500">
+              <span className="muted">
                 Page {data.page + 1} of {data.totalPages}
               </span>
               <button
                 type="button"
                 disabled={page + 1 >= data.totalPages}
                 onClick={() => setPage((p) => p + 1)}
-                className="rounded-md border border-zinc-300 px-3 py-1.5 disabled:opacity-40"
+                className="btn-ghost px-3 py-1.5 disabled:opacity-40"
               >
                 Next
               </button>

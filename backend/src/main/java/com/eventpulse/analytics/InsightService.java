@@ -27,16 +27,16 @@ public class InsightService {
 
     private final String apiKey;
     private final String model;
-    private final ObjectMapper objectMapper;
+    // Spring Boot 4 auto-configures Jackson 3; the Anthropic SDK ships
+    // Jackson 2, so this service keeps its own mapper for the stats payload.
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
     private volatile AnthropicClient client;
 
     public InsightService(
             @Value("${app.ai.api-key:}") String apiKey,
-            @Value("${app.ai.model:claude-opus-4-8}") String model,
-            ObjectMapper objectMapper) {
+            @Value("${app.ai.model:claude-opus-4-8}") String model) {
         this.apiKey = apiKey;
         this.model = model;
-        this.objectMapper = objectMapper;
     }
 
     public boolean enabled() {

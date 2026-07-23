@@ -5,8 +5,11 @@ import type {
   EventCategory,
   EventDetail,
   EventSummary,
+  Insight,
   Order,
+  OrganizerAnalytics,
   Page,
+  PersonalAnalytics,
   Ticket,
   User,
   WaitlistEntry,
@@ -22,6 +25,28 @@ export const authApi = {
   refresh: () => api.post<AuthResponse>('/auth/refresh').then((r) => r.data),
   logout: () => api.post('/auth/logout').then(() => undefined),
   me: () => api.get<User>('/users/me').then((r) => r.data),
+};
+
+// ---- Profile ----
+
+export const usersApi = {
+  updateProfile: (body: { name: string }) =>
+    api.patch<User>('/users/me', body).then((r) => r.data),
+  becomeOrganizer: () => api.post<User>('/users/me/organizer').then((r) => r.data),
+};
+
+// ---- Analytics ----
+
+export const analyticsApi = {
+  personal: () => api.get<PersonalAnalytics>('/analytics/me').then((r) => r.data),
+  organizer: () => api.get<OrganizerAnalytics>('/analytics/organizer').then((r) => r.data),
+  // 204 = AI insights not configured on the server; callers hide the card.
+  personalInsight: () =>
+    api.get<Insight>('/analytics/me/insight').then((r) => (r.status === 204 ? null : r.data)),
+  organizerInsight: () =>
+    api
+      .get<Insight>('/analytics/organizer/insight')
+      .then((r) => (r.status === 204 ? null : r.data)),
 };
 
 // ---- Events ----
