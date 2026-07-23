@@ -1,7 +1,9 @@
 package com.eventpulse.event;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,13 +49,18 @@ public class EventService {
     public PageResponse<EventSummaryResponse> browse(
             String query, String city, EventCategory category,
             Instant from, Instant to, int page, int size) {
+        // Absent filters come back as null; Specification.allOf rejects
+        // nulls, so drop them before combining.
         Specification<Event> spec = Specification.allOf(
-                EventSpecifications.published(),
-                EventSpecifications.textSearch(query),
-                EventSpecifications.inCity(city),
-                EventSpecifications.inCategory(category),
-                EventSpecifications.startsAfter(from),
-                EventSpecifications.startsBefore(to));
+                Stream.of(
+                        EventSpecifications.published(),
+                        EventSpecifications.textSearch(query),
+                        EventSpecifications.inCity(city),
+                        EventSpecifications.inCategory(category),
+                        EventSpecifications.startsAfter(from),
+                        EventSpecifications.startsBefore(to))
+                        .filter(Objects::nonNull)
+                        .toList());
 
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
@@ -170,14 +177,18 @@ public class EventService {
 
     @Transactional
     public void removeTicketType(UUID eventId, UUID organizerId, UUID ticketTypeId) {
-        ownedEvent(eventId, organizerId);
-        TicketType ticketType = ticketTypeRepository.findById(ticketTypeId)
-                .filter(t -> t.getEvent().getId().equals(eventId))
+        Event event = ownedEvent(eventId, organizerId);
+        TicketType ticketType = event.getTicketTypes().stream()
+                .filter(t -> t.getId().equals(ticketTypeId))
+                .findFirst()
                 .orElseThrow(() -> new NotFoundException("Ticket type not found"));
         if (ticketType.getSold() > 0 || ticketType.getHeld() > 0) {
             throw new ConflictException("Cannot remove a ticket type that has sold or held tickets");
         }
-        ticketTypeRepository.delete(ticketType);
+        // Must go through the parent collection: deleting the child directly
+        // is cancelled by the event's cascade while it still references it.
+        // orphanRemoval performs the actual delete on flush.
+        event.getTicketTypes().remove(ticketType);
     }
 
     Event ownedEvent(UUID eventId, UUID organizerId) {
