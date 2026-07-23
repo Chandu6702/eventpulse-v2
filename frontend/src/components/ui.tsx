@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 export function Spinner() {
   return (
     <div className="flex justify-center py-16" role="status" aria-label="Loading">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-indigo-600 dark:border-zinc-700 dark:border-t-indigo-400" />
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-orange-600 dark:border-zinc-700 dark:border-t-orange-400" />
     </div>
   );
 }
@@ -16,10 +16,10 @@ const badgeStyles: Record<string, string> = {
   CONFIRMED: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
   EXPIRED: 'bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300',
   VALID: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
-  CHECKED_IN: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-300',
+  CHECKED_IN: 'bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300',
   VOID: 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300',
   WAITING: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
-  NOTIFIED: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-300',
+  NOTIFIED: 'bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300',
   CONVERTED: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
 };
 

@@ -79,7 +79,7 @@ function DailySalesChart({ data }: { data: { date: string; count: number }[] }) 
           );
         })}
         {bars.map((bar) => (
-          <path key={bar.date} d={bar.path} className="fill-indigo-600 dark:fill-indigo-500" />
+          <path key={bar.date} d={bar.path} className="fill-orange-600 dark:fill-orange-600" />
         ))}
         {/* labels on first, middle and last day only */}
         {[0, 7, 13].map((i) => (
@@ -135,7 +135,7 @@ function CategoryBars({ data, unit }: { data: CategoryCount[]; unit: string }) {
           </span>
           <span className="h-3 flex-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
             <span
-              className="block h-full rounded-full bg-indigo-600 dark:bg-indigo-500"
+              className="block h-full rounded-full bg-orange-600 dark:bg-orange-600"
               style={{ width: `${(row.count / max) * 100}%` }}
             />
           </span>
@@ -167,7 +167,7 @@ function InsightCard({ queryKey, fetcher }: { queryKey: string; fetcher: () => P
     .filter(Boolean);
 
   return (
-    <div className="card border-indigo-200 p-5 dark:border-indigo-500/30">
+    <div className="card border-orange-200 p-5 dark:border-orange-500/30">
       <h3 className="font-display flex items-center gap-2 text-sm font-semibold">
         <span className="accent">✦</span> AI insight
       </h3>
@@ -258,7 +258,7 @@ function OrganizerSection() {
                     </p>
                     <span className="mt-1 block h-1.5 w-24 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                       <span
-                        className="block h-full rounded-full bg-indigo-600 dark:bg-indigo-500"
+                        className="block h-full rounded-full bg-orange-600 dark:bg-orange-600"
                         style={{ width: `${event.capacity > 0 ? Math.min(100, (event.sold / event.capacity) * 100) : 0}%` }}
                       />
                     </span>

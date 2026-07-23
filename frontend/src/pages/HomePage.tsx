@@ -20,7 +20,7 @@ function EventCard({ event }: { event: EventSummary }) {
   return (
     <Link
       to={`/events/${event.id}`}
-      className="card block p-5 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:hover:border-indigo-500/50"
+      className="card block p-5 transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md dark:hover:border-orange-500/50"
     >
       <p className="accent text-xs font-semibold tracking-wide uppercase">{event.category}</p>
       <h2 className="font-display mt-1 line-clamp-2 text-lg font-semibold">{event.title}</h2>

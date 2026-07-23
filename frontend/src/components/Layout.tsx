@@ -5,7 +5,7 @@ import { useTheme } from './theme';
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
     isActive
-      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
+      ? 'bg-orange-50 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300'
       : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'
   }`;
 
@@ -43,8 +43,8 @@ export function Layout() {
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
           <Link to="/" className="flex shrink-0 items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-500 opacity-60" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-500 opacity-60" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-orange-600 dark:bg-orange-400" />
             </span>
             <span className="font-display text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
               EventPulse
@@ -90,7 +90,7 @@ export function Layout() {
                   className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   title="Profile settings"
                 >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white dark:bg-indigo-500">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-600 text-xs font-semibold text-white dark:bg-orange-500">
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                   <span className="hidden max-w-28 truncate text-sm font-medium sm:inline">

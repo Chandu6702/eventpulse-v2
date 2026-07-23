@@ -29,7 +29,7 @@ export function MyOrdersPage() {
             <li key={order.id}>
               <Link
                 to={`/orders/${order.id}`}
-                className="card flex items-center justify-between p-4 transition hover:border-indigo-300 dark:hover:border-indigo-500/50"
+                className="card flex items-center justify-between p-4 transition hover:border-orange-300 dark:hover:border-orange-500/50"
               >
                 <div>
                   <p className="font-medium">{order.eventTitle}</p>

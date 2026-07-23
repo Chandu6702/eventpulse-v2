@@ -34,7 +34,7 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
         <p className="muted mt-2 text-sm">{formatDateTime(ticket.startsAt)}</p>
         <p className="muted truncate text-sm">{ticket.venue}</p>
         {ticket.status === 'CHECKED_IN' && ticket.checkedInAt && (
-          <p className="mt-2 text-xs text-indigo-600 dark:text-indigo-400">
+          <p className="mt-2 text-xs text-sky-600 dark:text-sky-400">
             Checked in {formatDateTime(ticket.checkedInAt)}
           </p>
         )}

@@ -144,7 +144,7 @@ export function OrganizerDashboardPage() {
             <li key={event.id}>
               <Link
                 to={`/organizer/events/${event.id}`}
-                className="card flex items-center justify-between p-4 transition hover:border-indigo-300 dark:hover:border-indigo-500/50"
+                className="card flex items-center justify-between p-4 transition hover:border-orange-300 dark:hover:border-orange-500/50"
               >
                 <div>
                   <p className="font-medium">{event.title}</p>

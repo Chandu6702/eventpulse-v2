@@ -49,7 +49,7 @@ export function ProfilePage() {
       <h1 className="page-title">Profile settings</h1>
 
       <div className="card flex items-center gap-4 p-6">
-        <span className="font-display flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-xl font-bold text-white dark:bg-indigo-500">
+        <span className="font-display flex h-14 w-14 items-center justify-center rounded-full bg-orange-600 text-xl font-bold text-white dark:bg-orange-500">
           {user.name.charAt(0).toUpperCase()}
         </span>
         <div className="min-w-0">
@@ -91,7 +91,7 @@ export function ProfilePage() {
       </form>
 
       {user.role === 'ATTENDEE' && (
-        <div className="card border-indigo-200 p-6 dark:border-indigo-500/30">
+        <div className="card border-orange-200 p-6 dark:border-orange-500/30">
           <h2 className="font-display text-lg font-semibold">Want to host your own events?</h2>
           <p className="muted mt-1 text-sm">
             Upgrade to an organizer account to create events, sell tickets and see live sales

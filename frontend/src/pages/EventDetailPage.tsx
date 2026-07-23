@@ -144,7 +144,7 @@ export function EventDetailPage() {
         <h2 className="font-display mb-2 text-lg font-semibold">Tickets</h2>
         <ErrorNote message={error} />
         {waitlistMessage && (
-          <p className="rounded-lg bg-indigo-50 px-3 py-2 text-sm text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
+          <p className="rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-700 dark:bg-orange-500/10 dark:text-orange-300">
             {waitlistMessage}
           </p>
         )}
