@@ -26,9 +26,10 @@ Java/Spring + PostgreSQL.
   observations — provider-switchable between Claude and Google Gemini
   (free tier; set `AI_PROVIDER=gemini` + `AI_API_KEY`). Without a key the
   endpoints return 204 and the dashboard simply shows numbers.
-- Payment is a simulated gateway behind a real seam —
-  [docs/PAYMENTS.md](docs/PAYMENTS.md) is the mapped path to Razorpay
-  test mode.
+- Payment is a simulated gateway behind a real seam. Every planned
+  upgrade — Razorpay test mode, object storage for images, outbox
+  notifications, assigned seating, and more — is mapped with concrete
+  implementation plans in [docs/ROADMAP.md](docs/ROADMAP.md).
 - Light/dark theme, responsive down to phones.
 
 ## Architecture
