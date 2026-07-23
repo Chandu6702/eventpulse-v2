@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import QrScanner from 'qr-scanner';
 import { checkInApi, eventsApi } from '../../api/endpoints';
 import { problemDetail } from '../../api/client';
 import type { CheckInResult } from '../../api/types';
@@ -7,16 +8,22 @@ import { formatDateTime } from '../../utils/format';
 import { ErrorNote, Spinner } from '../../components/ui';
 
 /**
- * Gate console: staff pick which event this station admits, then paste or
- * scan ticket codes. A hardware QR scanner acts as a keyboard, so a focused
- * input is all the integration needed. Scoping scans to one event means a
- * genuine ticket for the workshop next door is turned away at this gate.
+ * Gate console: staff pick which event this station admits, then scan
+ * tickets three ways — a hardware QR scanner (acts as a keyboard, so a
+ * focused input is all the integration needed), the device camera, or
+ * pasting the code. Scoping scans to one event means a genuine ticket
+ * for the workshop next door is turned away at this gate.
  */
 export function CheckInPage() {
   const [eventId, setEventId] = useState('');
   const [code, setCode] = useState('');
+  const [cameraOn, setCameraOn] = useState(false);
   const [lastResult, setLastResult] = useState<CheckInResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  // The same QR stays in front of the camera for many frames — remember
+  // what was just submitted so one ticket produces one request.
+  const recentScan = useRef<{ code: string; at: number }>({ code: '', at: 0 });
 
   const events = useQuery({ queryKey: ['my-events'], queryFn: () => eventsApi.mine() });
   const gateEvents = events.data?.content.filter((e) => e.status === 'PUBLISHED') ?? [];
@@ -41,6 +48,33 @@ export function CheckInPage() {
       scan.mutate(code.trim());
     }
   }
+
+  useEffect(() => {
+    if (!cameraOn || !videoRef.current) {
+      return;
+    }
+    const scanner = new QrScanner(
+      videoRef.current,
+      (result) => {
+        const now = Date.now();
+        if (result.data === recentScan.current.code && now - recentScan.current.at < 3000) {
+          return;
+        }
+        recentScan.current = { code: result.data, at: now };
+        scan.mutate(result.data);
+      },
+      { returnDetailedScanResult: true, highlightScanRegion: true, maxScansPerSecond: 4 },
+    );
+    scanner.start().catch((e: unknown) => {
+      setCameraOn(false);
+      setError(e instanceof Error ? e.message : 'Could not start the camera');
+    });
+    return () => {
+      scanner.stop();
+      scanner.destroy();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraOn, selectedEventId]);
 
   if (events.isPending) {
     return <Spinner />;
@@ -89,6 +123,27 @@ export function CheckInPage() {
               {scan.isPending ? 'Checking…' : 'Check in'}
             </button>
           </form>
+
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setCameraOn((v) => !v);
+              }}
+              className="btn-ghost w-full"
+            >
+              {cameraOn ? 'Stop camera' : 'Scan with camera'}
+            </button>
+            {cameraOn && (
+              <video
+                ref={videoRef}
+                className="mt-3 aspect-video w-full rounded-2xl bg-black object-cover"
+                muted
+                playsInline
+              />
+            )}
+          </div>
         </>
       )}
 
