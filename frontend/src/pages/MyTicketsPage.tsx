@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -7,14 +8,28 @@ import { formatDateTime } from '../utils/format';
 import { Badge, EmptyState, Spinner } from '../components/ui';
 
 function TicketCard({ ticket }: { ticket: Ticket }) {
+  const [copied, setCopied] = useState(false);
+
+  function copyCode() {
+    navigator.clipboard.writeText(ticket.code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   return (
     <div className="card flex overflow-hidden p-0">
       {/* QR stub — always on a white patch so scanners read it in dark mode too */}
       <div className="flex shrink-0 flex-col items-center justify-center gap-1.5 bg-white p-4">
         <QRCodeSVG value={ticket.code} size={104} aria-label="Ticket QR code" />
-        <p className="font-mono text-[10px] tracking-wider text-zinc-400">
-          {ticket.code.slice(0, 12)}…
-        </p>
+        <button
+          type="button"
+          onClick={copyCode}
+          title="Copy the full ticket code"
+          className="font-mono text-[10px] tracking-wider text-zinc-400 hover:text-zinc-600"
+        >
+          {copied ? 'Copied ✓' : `${ticket.code.slice(0, 12)}… ⧉`}
+        </button>
       </div>
 
       {/* Perforation between stub and details */}
