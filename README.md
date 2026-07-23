@@ -74,16 +74,21 @@ cd backend && ./mvnw spring-boot:run
 (Or run `EventpulseApiApplication` from IntelliJ — no configuration needed.)
 
 To point at a different database (other credentials, or a cloud Postgres like
-Supabase), create a git-ignored `backend/local-secrets.properties`:
+Supabase), create a git-ignored `backend/application-local.yml`:
 
-```properties
-DB_URL=jdbc:postgresql://<host>:5432/<db>
-DB_USERNAME=<user>
-DB_PASSWORD=<password>
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://<host>:5432/<db>
+    username: <user>
+    password: <password>
 ```
 
-Spring loads it automatically; real environments use env vars instead.
-Never put real credentials in `application.yml` — it is public.
+Spring loads it automatically and it overrides the defaults. Hosted
+environments (e.g. Render) skip the file entirely and set env vars
+(`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`), which take
+precedence over any yml. Never put real credentials in `application.yml` —
+it is public.
 
 Prefer Docker for the database instead? `docker compose up -d` starts one
 with matching credentials.

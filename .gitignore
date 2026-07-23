@@ -8,7 +8,7 @@ build/
 .env
 .env.local
 *.env
-local-secrets.properties
+application-local.yml
 
 # IDE
 .idea/
