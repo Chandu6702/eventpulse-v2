@@ -26,6 +26,8 @@ export interface EventSummary {
   id: string;
   title: string;
   category: EventCategory;
+  /** Custom category name, present only when category is OTHER. */
+  categoryLabel: string | null;
   venue: string;
   city: string | null;
   imageUrl: string | null;

@@ -16,12 +16,34 @@ const CATEGORIES: EventCategory[] = [
   'OTHER',
 ];
 
+/**
+ * Downscale + JPEG-compress in the browser so the stored inline image stays
+ * small (~100-300 KB). Steps down in quality until it fits the API cap.
+ */
+async function compressImage(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, 1280 / bitmap.width);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  for (const quality of [0.8, 0.6, 0.45]) {
+    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+    if (dataUrl.length < 480_000) {
+      return dataUrl;
+    }
+  }
+  throw new Error('Image is too large even after compression — try a smaller one.');
+}
+
 function CreateEventForm({ onDone }: { onDone: () => void }) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<EventCategory>('MEETUP');
   const [venue, setVenue] = useState('');
   const [city, setCity] = useState('');
+  const [categoryLabel, setCategoryLabel] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imageData, setImageData] = useState('');
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
   const [description, setDescription] = useState('');
@@ -34,7 +56,8 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
         category,
         venue,
         city: city || null,
-        imageUrl: imageUrl.trim() || null,
+        categoryLabel: category === 'OTHER' ? categoryLabel.trim() || null : null,
+        imageUrl: imageData || imageUrl.trim() || null,
         description: description || null,
         startsAt: new Date(startsAt).toISOString(),
         endsAt: new Date(endsAt).toISOString(),
@@ -69,6 +92,19 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
             ))}
           </select>
         </label>
+        {category === 'OTHER' && (
+          <label className="block text-sm">
+            <span className="lbl">What kind of event?</span>
+            <input
+              required
+              maxLength={50}
+              placeholder="Hackathon, standup night, …"
+              value={categoryLabel}
+              onChange={(e) => setCategoryLabel(e.target.value)}
+              className={inputClass}
+            />
+          </label>
+        )}
         <label className="block text-sm">
           <span className="lbl">Venue</span>
           <input required maxLength={200} value={venue} onChange={(e) => setVenue(e.target.value)} className={inputClass} />
@@ -87,10 +123,45 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
             <input type="datetime-local" required value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className={inputClass} />
           </label>
         </div>
-        <label className="block text-sm sm:col-span-2">
-          <span className="lbl">Cover image URL (optional)</span>
-          <input type="url" maxLength={500} placeholder="https://images.unsplash.com/..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className={inputClass} />
-        </label>
+        <div className="block text-sm sm:col-span-2">
+          <span className="lbl">Cover image (optional)</span>
+          {imageData ? (
+            <div className="flex items-center gap-3">
+              <img src={imageData} alt="Cover preview" className="h-16 w-28 rounded-lg object-cover" />
+              <button
+                type="button"
+                onClick={() => setImageData('')}
+                className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    compressImage(file)
+                      .then(setImageData)
+                      .catch((err) => setError(err.message));
+                  }
+                }}
+                className="input file:mr-3 file:rounded-md file:border-0 file:bg-orange-50 file:px-3 file:py-1 file:text-sm file:font-medium file:text-orange-700 dark:file:bg-orange-500/15 dark:file:text-orange-300"
+              />
+              <input
+                type="url"
+                maxLength={500}
+                placeholder="…or paste an image URL"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+          )}
+        </div>
         <label className="block text-sm sm:col-span-2">
           <span className="lbl">Description</span>
           <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} className={inputClass} />

@@ -51,7 +51,9 @@ function EventCard({ event }: { event: EventSummary }) {
     >
       <EventCover event={event} />
       <div className="p-5">
-        <p className="accent text-xs font-semibold tracking-wide uppercase">{event.category}</p>
+        <p className="accent text-xs font-semibold tracking-wide uppercase">
+          {event.categoryLabel ?? event.category}
+        </p>
         <h2 className="font-display mt-1 line-clamp-2 text-lg font-semibold">{event.title}</h2>
         <p className="muted mt-2 text-sm">{formatDateTime(event.startsAt)}</p>
         <p className="muted text-sm">

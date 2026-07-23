@@ -130,7 +130,9 @@ export function EventDetailPage() {
         />
       )}
       <div className="mb-2 flex items-center gap-3">
-        <p className="accent text-xs font-semibold tracking-wide uppercase">{event.category}</p>
+        <p className="accent text-xs font-semibold tracking-wide uppercase">
+          {event.categoryLabel ?? event.category}
+        </p>
         {event.status !== 'PUBLISHED' && <Badge value={event.status} />}
       </div>
       <h1 className="font-display text-3xl font-bold tracking-tight">{event.title}</h1>

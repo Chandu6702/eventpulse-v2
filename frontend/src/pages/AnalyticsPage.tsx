@@ -229,7 +229,7 @@ function OrganizerSection() {
       </div>
 
       {data.events.length > 0 && (
-        <div className="card overflow-x-auto p-5">
+        <div className="card scroll-thin overflow-x-auto p-5">
           <h3 className="font-display mb-3 text-sm font-semibold">Per-event pulse</h3>
           <table className="w-full min-w-[560px] text-sm">
             <thead>

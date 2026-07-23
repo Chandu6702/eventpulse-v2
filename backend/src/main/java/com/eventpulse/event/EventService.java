@@ -107,6 +107,7 @@ public class EventService {
                 request.startsAt(),
                 request.endsAt());
         event.setImageUrl(request.imageUrl());
+        event.setCategoryLabel(customLabelFor(request.category(), request.categoryLabel()));
         return EventDetailResponse.from(eventRepository.save(event));
     }
 
@@ -122,6 +123,11 @@ public class EventService {
         }
         if (request.category() != null) {
             event.setCategory(request.category());
+        }
+        if (request.category() != null || request.categoryLabel() != null) {
+            event.setCategoryLabel(customLabelFor(event.getCategory(),
+                    request.categoryLabel() != null ? request.categoryLabel()
+                            : event.getCategoryLabel()));
         }
         if (request.venue() != null) {
             event.setVenue(request.venue().trim());
@@ -140,6 +146,14 @@ public class EventService {
         }
         validateSchedule(event.getStartsAt(), event.getEndsAt());
         return EventDetailResponse.from(event);
+    }
+
+    /** A custom label only makes sense on OTHER; anything else drops it. */
+    private static String customLabelFor(EventCategory category, String label) {
+        if (category != EventCategory.OTHER || label == null || label.isBlank()) {
+            return null;
+        }
+        return label.trim();
     }
 
     @Transactional

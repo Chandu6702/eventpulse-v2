@@ -52,8 +52,12 @@ public class Event {
     @Column(length = 100)
     private String city;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", columnDefinition = "text")
     private String imageUrl;
+
+    /** Free-text category name, used only when category is OTHER. */
+    @Column(name = "category_label", length = 50)
+    private String categoryLabel;
 
     @Column(name = "starts_at", nullable = false)
     private Instant startsAt;
@@ -185,6 +189,14 @@ public class Event {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getCategoryLabel() {
+        return categoryLabel;
+    }
+
+    public void setCategoryLabel(String categoryLabel) {
+        this.categoryLabel = categoryLabel;
     }
 
     public Instant getStartsAt() {

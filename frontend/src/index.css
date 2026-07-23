@@ -68,4 +68,9 @@ body {
   .accent {
     @apply text-orange-700 dark:text-orange-400;
   }
+
+  /* Slim, unobtrusive scrollbar for containers that must scroll (wide tables) */
+  .scroll-thin {
+    scrollbar-width: thin;
+  }
 }
