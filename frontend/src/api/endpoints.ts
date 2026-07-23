@@ -117,5 +117,6 @@ export const waitlistApi = {
 };
 
 export const checkInApi = {
-  scan: (code: string) => api.post<CheckInResult>('/check-in', { code }).then((r) => r.data),
+  scan: (code: string, eventId: string) =>
+    api.post<CheckInResult>('/check-in', { code, eventId }).then((r) => r.data),
 };

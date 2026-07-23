@@ -45,6 +45,7 @@ class CheckInIntegrationTest extends AbstractIntegrationTest {
 
     private User organizer;
     private User attendee;
+    private Event event;
     private Ticket ticket;
 
     @BeforeEach
@@ -54,7 +55,7 @@ class CheckInIntegrationTest extends AbstractIntegrationTest {
         attendee = userRepository.save(new User(
                 "Visitor", "visitor-" + UUID.randomUUID() + "@test.dev", "n/a", Role.ATTENDEE));
 
-        Event event = new Event(
+        event = new Event(
                 organizer, "Check-in Conf", null, EventCategory.CONFERENCE,
                 "Hall A", "Bengaluru",
                 Instant.now().plus(7, ChronoUnit.DAYS),
@@ -74,14 +75,16 @@ class CheckInIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void validTicketChecksInExactlyOnce() {
-        CheckInResponse response = checkInService.checkIn(ticket.getCode(), organizer.getId());
+        CheckInResponse response =
+                checkInService.checkIn(ticket.getCode(), event.getId(), organizer.getId());
 
         assertThat(response.attendeeName()).isEqualTo("Visitor");
         assertThat(ticketRepository.findById(ticket.getId()).orElseThrow().getStatus())
                 .isEqualTo(TicketStatus.CHECKED_IN);
 
         // The same QR scanned again is rejected with the original scan time.
-        assertThatThrownBy(() -> checkInService.checkIn(ticket.getCode(), organizer.getId()))
+        assertThatThrownBy(() ->
+                checkInService.checkIn(ticket.getCode(), event.getId(), organizer.getId()))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("already checked in");
     }
@@ -91,7 +94,30 @@ class CheckInIntegrationTest extends AbstractIntegrationTest {
         User otherOrganizer = userRepository.save(new User(
                 "Someone Else", "other-" + UUID.randomUUID() + "@test.dev", "n/a", Role.ORGANIZER));
 
-        assertThatThrownBy(() -> checkInService.checkIn(ticket.getCode(), otherOrganizer.getId()))
+        assertThatThrownBy(() ->
+                checkInService.checkIn(ticket.getCode(), event.getId(), otherOrganizer.getId()))
                 .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void ticketForAnotherEventIsRejectedAtThisGate() {
+        // Same organizer, same venue, second hall — the classic wrong-gate case.
+        Event otherEvent = new Event(
+                organizer, "Other Workshop", null, EventCategory.WORKSHOP,
+                "Hall B", "Bengaluru",
+                Instant.now().plus(7, ChronoUnit.DAYS),
+                Instant.now().plus(8, ChronoUnit.DAYS));
+        otherEvent.addTicketType(new TicketType(otherEvent, "Seat", 0, 10, 4, null, null));
+        otherEvent.publish();
+        eventRepository.save(otherEvent);
+
+        assertThatThrownBy(() ->
+                checkInService.checkIn(ticket.getCode(), otherEvent.getId(), organizer.getId()))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("Check-in Conf");
+
+        // The wrong-gate attempt must not consume the ticket.
+        assertThat(ticketRepository.findById(ticket.getId()).orElseThrow().getStatus())
+                .isEqualTo(TicketStatus.VALID);
     }
 }

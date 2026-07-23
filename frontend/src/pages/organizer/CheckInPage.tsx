@@ -1,22 +1,29 @@
 import { useState, type FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { checkInApi } from '../../api/endpoints';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { checkInApi, eventsApi } from '../../api/endpoints';
 import { problemDetail } from '../../api/client';
 import type { CheckInResult } from '../../api/types';
 import { formatDateTime } from '../../utils/format';
-import { ErrorNote } from '../../components/ui';
+import { ErrorNote, Spinner } from '../../components/ui';
 
 /**
- * Gate console: staff paste/scan a ticket code. A hardware QR scanner acts
- * as a keyboard, so a focused input is all the integration needed.
+ * Gate console: staff pick which event this station admits, then paste or
+ * scan ticket codes. A hardware QR scanner acts as a keyboard, so a focused
+ * input is all the integration needed. Scoping scans to one event means a
+ * genuine ticket for the workshop next door is turned away at this gate.
  */
 export function CheckInPage() {
+  const [eventId, setEventId] = useState('');
   const [code, setCode] = useState('');
   const [lastResult, setLastResult] = useState<CheckInResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const events = useQuery({ queryKey: ['my-events'], queryFn: () => eventsApi.mine() });
+  const gateEvents = events.data?.content.filter((e) => e.status === 'PUBLISHED') ?? [];
+  const selectedEventId = eventId || gateEvents[0]?.id || '';
+
   const scan = useMutation({
-    mutationFn: (ticketCode: string) => checkInApi.scan(ticketCode),
+    mutationFn: (ticketCode: string) => checkInApi.scan(ticketCode, selectedEventId),
     onSuccess: (result) => {
       setLastResult(result);
       setError(null);
@@ -30,41 +37,68 @@ export function CheckInPage() {
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (code.trim()) {
+    if (code.trim() && selectedEventId) {
       scan.mutate(code.trim());
     }
+  }
+
+  if (events.isPending) {
+    return <Spinner />;
   }
 
   return (
     <div className="mx-auto max-w-xl">
       <h1 className="page-title mb-1">Ticket check-in</h1>
       <p className="muted mb-6 text-sm">
-        Point a QR scanner at the attendee's ticket (it types the code and presses Enter), or
-        paste the code manually. Each ticket can be checked in exactly once.
+        Pick the event this gate is for, then scan or paste ticket codes. A QR scanner types the
+        code and presses Enter on its own. Tickets for other events are rejected here.
       </p>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="Scan or paste ticket code…"
-          autoFocus
-          className="input font-mono"
-        />
-        <button
-          type="submit"
-          disabled={scan.isPending}
-          className="btn-primary px-5"
-        >
-          {scan.isPending ? 'Checking…' : 'Check in'}
-        </button>
-      </form>
+      {gateEvents.length === 0 ? (
+        <p className="muted text-sm">No published events to check in for yet.</p>
+      ) : (
+        <>
+          <label className="mb-4 block text-sm">
+            <span className="lbl">Checking in for</span>
+            <select
+              value={selectedEventId}
+              onChange={(e) => {
+                setEventId(e.target.value);
+                setLastResult(null);
+                setError(null);
+              }}
+              className="input"
+            >
+              {gateEvents.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.title} — {e.venue}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="Scan or paste ticket code…"
+              autoFocus
+              className="input font-mono"
+            />
+            <button type="submit" disabled={scan.isPending} className="btn-primary px-5">
+              {scan.isPending ? 'Checking…' : 'Check in'}
+            </button>
+          </form>
+        </>
+      )}
 
       <div className="mt-6">
         <ErrorNote message={error} />
         {lastResult && (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/10">
-            <p className="text-lg font-semibold text-emerald-900 dark:text-emerald-300">✓ {lastResult.attendeeName}</p>
+            <p className="text-lg font-semibold text-emerald-900 dark:text-emerald-300">
+              ✓ {lastResult.attendeeName}
+            </p>
             <p className="text-sm text-emerald-800 dark:text-emerald-400">
               {lastResult.ticketTypeName} · {lastResult.eventTitle}
             </p>

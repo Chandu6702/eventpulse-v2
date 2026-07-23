@@ -14,6 +14,7 @@ import com.eventpulse.checkin.dto.CheckInResponse;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/api/v1/check-in")
@@ -25,7 +26,8 @@ public class CheckInController {
         this.checkInService = checkInService;
     }
 
-    public record CheckInRequest(@NotBlank String code) {
+    /** eventId names the gate: which event this scanning station admits. */
+    public record CheckInRequest(@NotBlank String code, @NotNull UUID eventId) {
     }
 
     @PostMapping
@@ -33,6 +35,7 @@ public class CheckInController {
     public CheckInResponse checkIn(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CheckInRequest request) {
-        return checkInService.checkIn(request.code(), UUID.fromString(jwt.getSubject()));
+        return checkInService.checkIn(
+                request.code(), request.eventId(), UUID.fromString(jwt.getSubject()));
     }
 }

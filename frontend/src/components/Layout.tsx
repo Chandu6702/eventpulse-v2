@@ -72,7 +72,15 @@ export function Layout() {
             {isOrganizer && (
               <>
                 <span className="mx-1 hidden h-5 w-px bg-zinc-200 sm:block dark:bg-zinc-800" />
-                <NavLink to="/organizer" className={navLinkClass}>
+                {/* Active on the dashboard and its event pages, but not on check-in */}
+                <NavLink
+                  to="/organizer"
+                  className={navLinkClass({
+                    isActive:
+                      location.pathname === '/organizer' ||
+                      location.pathname.startsWith('/organizer/events'),
+                  })}
+                >
                   Dashboard
                 </NavLink>
                 <NavLink to="/organizer/check-in" className={navLinkClass}>
