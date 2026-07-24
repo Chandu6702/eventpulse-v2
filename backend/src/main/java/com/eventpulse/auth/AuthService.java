@@ -20,16 +20,19 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final PasswordPolicy passwordPolicy;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            RefreshTokenService refreshTokenService) {
+            RefreshTokenService refreshTokenService,
+            PasswordPolicy passwordPolicy) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.passwordPolicy = passwordPolicy;
     }
 
     @Transactional
@@ -38,6 +41,7 @@ public class AuthService {
         if (userRepository.existsByEmail(email)) {
             throw new ConflictException("An account with this email already exists");
         }
+        passwordPolicy.validate(request.password(), email, request.name());
 
         User user = userRepository.save(new User(
                 request.name().trim(),

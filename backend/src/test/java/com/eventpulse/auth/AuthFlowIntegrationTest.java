@@ -40,7 +40,7 @@ class AuthFlowIntegrationTest extends AbstractIntegrationTest {
 
         ResponseEntity<Map> registered = rest.postForEntity(
                 "/api/v1/auth/register",
-                Map.of("name", "Auth Tester", "email", email, "password", "secret-password"),
+                Map.of("name", "Auth Tester", "email", email, "password", "Secret-Pass1"),
                 Map.class);
 
         assertThat(registered.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -63,11 +63,26 @@ class AuthFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @SuppressWarnings("rawtypes")
+    void weakPasswordsAreRejectedAtRegistration() {
+        for (String weak : new String[] { "password123", "12345678", "alllowercase1!", "NoSymbol1" }) {
+            ResponseEntity<Map> response = rest.postForEntity(
+                    "/api/v1/auth/register",
+                    Map.of("name", "Weak Pw", "email", "weak-" + UUID.randomUUID() + "@test.dev",
+                            "password", weak),
+                    Map.class);
+            assertThat(response.getStatusCode())
+                    .as("password '%s' should be rejected", weak)
+                    .isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Test
+    @SuppressWarnings("rawtypes")
     void refreshRotatesTokenAndDetectsReuse() {
         String email = "rotate-" + UUID.randomUUID() + "@test.dev";
         ResponseEntity<Map> registered = rest.postForEntity(
                 "/api/v1/auth/register",
-                Map.of("name", "Rotate Tester", "email", email, "password", "secret-password"),
+                Map.of("name", "Rotate Tester", "email", email, "password", "Secret-Pass1"),
                 Map.class);
         String originalCookie = refreshCookie(registered);
 

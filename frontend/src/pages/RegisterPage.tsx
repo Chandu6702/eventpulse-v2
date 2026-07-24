@@ -76,6 +76,9 @@ export function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <span className="muted mt-1 block text-xs">
+              8+ characters with an uppercase letter, a number and a symbol.
+            </span>
           </label>
           <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
             <input

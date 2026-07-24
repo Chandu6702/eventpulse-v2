@@ -67,8 +67,7 @@ function ChangePasswordCard() {
         )}
       </div>
       <p className="muted text-xs">
-        Forgot your password and locked out? Password reset by email is on the roadmap — for now,
-        an admin can reset it.
+        At least 8 characters with an uppercase letter, a number and a symbol.
       </p>
     </form>
   );
