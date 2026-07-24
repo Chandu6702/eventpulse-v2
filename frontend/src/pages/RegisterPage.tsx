@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/endpoints';
 import { problemDetail } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
-import { ErrorNote } from '../components/ui';
+import { ErrorNote, PasswordInput } from '../components/ui';
 
 export function RegisterPage() {
   const { onAuthenticated } = useAuth();
@@ -70,13 +70,11 @@ export function RegisterPage() {
           </label>
           <label className="block text-sm">
             <span className="lbl">Password</span>
-            <input
-              type="password"
+            <PasswordInput
               required
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input"
             />
           </label>
           <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">

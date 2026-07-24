@@ -3,8 +3,115 @@ import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { eventsApi } from '../../api/endpoints';
 import { problemDetail } from '../../api/client';
+import type { EventCategory, EventDetail } from '../../api/types';
 import { formatDateTime, formatPrice } from '../../utils/format';
 import { Badge, ErrorNote, Spinner } from '../../components/ui';
+
+const CATEGORIES: EventCategory[] = [
+  'CONFERENCE',
+  'MEETUP',
+  'WORKSHOP',
+  'WEBINAR',
+  'CONCERT',
+  'OTHER',
+];
+
+/** ISO instant -> value a datetime-local input understands (local wall clock). */
+function toLocalInput(iso: string): string {
+  const d = new Date(iso);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+}
+
+function EditEventForm({ event, onDone }: { event: EventDetail; onDone: () => void }) {
+  const [title, setTitle] = useState(event.title);
+  const [category, setCategory] = useState<EventCategory>(event.category);
+  const [categoryLabel, setCategoryLabel] = useState(event.categoryLabel ?? '');
+  const [venue, setVenue] = useState(event.venue);
+  const [city, setCity] = useState(event.city ?? '');
+  const [startsAt, setStartsAt] = useState(toLocalInput(event.startsAt));
+  const [endsAt, setEndsAt] = useState(toLocalInput(event.endsAt));
+  const [description, setDescription] = useState(event.description ?? '');
+  const [error, setError] = useState<string | null>(null);
+
+  const save = useMutation({
+    mutationFn: () =>
+      eventsApi.update(event.id, {
+        title,
+        category,
+        categoryLabel: category === 'OTHER' ? categoryLabel.trim() || null : null,
+        venue,
+        city: city || null,
+        description: description || null,
+        startsAt: new Date(startsAt).toISOString(),
+        endsAt: new Date(endsAt).toISOString(),
+      }),
+    onSuccess: onDone,
+    onError: (e) => setError(problemDetail(e)),
+  });
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        save.mutate();
+      }}
+      className="card mt-4 space-y-4 p-5"
+    >
+      <h2 className="font-display text-lg font-semibold">Edit details</h2>
+      <ErrorNote message={error} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block text-sm sm:col-span-2">
+          <span className="lbl">Title</span>
+          <input required maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} className="input" />
+        </label>
+        <label className="block text-sm">
+          <span className="lbl">Category</span>
+          <select value={category} onChange={(e) => setCategory(e.target.value as EventCategory)} className="input">
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c.charAt(0) + c.slice(1).toLowerCase()}
+              </option>
+            ))}
+          </select>
+        </label>
+        {category === 'OTHER' && (
+          <label className="block text-sm">
+            <span className="lbl">What kind of event?</span>
+            <input required maxLength={50} value={categoryLabel} onChange={(e) => setCategoryLabel(e.target.value)} className="input" />
+          </label>
+        )}
+        <label className="block text-sm">
+          <span className="lbl">Venue</span>
+          <input required maxLength={200} value={venue} onChange={(e) => setVenue(e.target.value)} className="input" />
+        </label>
+        <label className="block text-sm">
+          <span className="lbl">City</span>
+          <input maxLength={100} value={city} onChange={(e) => setCity(e.target.value)} className="input" />
+        </label>
+        <label className="block text-sm">
+          <span className="lbl">Starts</span>
+          <input type="datetime-local" required value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="input" />
+        </label>
+        <label className="block text-sm">
+          <span className="lbl">Ends</span>
+          <input type="datetime-local" required value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="input" />
+        </label>
+        <label className="block text-sm sm:col-span-2">
+          <span className="lbl">Description</span>
+          <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} className="input" />
+        </label>
+      </div>
+      <div className="flex gap-3">
+        <button type="submit" disabled={save.isPending} className="btn-primary">
+          {save.isPending ? 'Saving…' : 'Save details'}
+        </button>
+        <button type="button" onClick={onDone} className="btn-ghost">
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
 
 function AddTicketTypeForm({ eventId, onDone }: { eventId: string; onDone: () => void }) {
   const [name, setName] = useState('');
@@ -71,6 +178,7 @@ export function EventManagePage() {
   const { eventId = '' } = useParams();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   const { data: event, isPending } = useQuery({
     queryKey: ['event', eventId],
@@ -117,7 +225,7 @@ export function EventManagePage() {
         <ErrorNote message={error} />
       </div>
 
-      <div className="mt-4 flex gap-3">
+      <div className="mt-4 flex flex-wrap gap-3">
         {event.status === 'DRAFT' && (
           <button
             type="button"
@@ -126,6 +234,11 @@ export function EventManagePage() {
             className="btn-primary"
           >
             {publish.isPending ? 'Publishing…' : 'Publish event'}
+          </button>
+        )}
+        {event.status === 'DRAFT' && (
+          <button type="button" onClick={() => setEditing((v) => !v)} className="btn-ghost">
+            {editing ? 'Close editor' : 'Edit details'}
           </button>
         )}
         {event.status !== 'CANCELLED' && (
@@ -143,6 +256,22 @@ export function EventManagePage() {
           </button>
         )}
       </div>
+
+      {editing && event.status === 'DRAFT' && (
+        <EditEventForm
+          event={event}
+          onDone={() => {
+            setEditing(false);
+            refresh();
+          }}
+        />
+      )}
+      {event.status !== 'DRAFT' && event.status !== 'CANCELLED' && (
+        <p className="muted mt-3 text-xs">
+          Published events can't have their details edited — attendees have already booked against
+          them. Cancel and recreate if a major change is needed.
+        </p>
+      )}
 
       <div className="card mt-8 p-5">
         <h2 className="font-display text-lg font-semibold">Ticket types</h2>

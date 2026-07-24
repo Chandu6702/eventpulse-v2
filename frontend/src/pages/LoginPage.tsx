@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/endpoints';
 import { problemDetail } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
-import { ErrorNote } from '../components/ui';
+import { ErrorNote, PasswordInput } from '../components/ui';
 
 export function LoginPage() {
   const { onAuthenticated } = useAuth();
@@ -51,12 +51,10 @@ export function LoginPage() {
           </label>
           <label className="block text-sm">
             <span className="lbl">Password</span>
-            <input
-              type="password"
+            <PasswordInput
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input"
             />
           </label>
           <button type="submit" disabled={submitting} className="btn-primary w-full py-2">

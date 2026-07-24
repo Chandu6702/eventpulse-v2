@@ -30,6 +30,10 @@ function TicketTypeRow({
           {formatPrice(ticketType.priceCents, ticketType.currency)}
           {soldOut ? (
             <span className="ml-2 font-medium text-red-600 dark:text-red-400">Sold out</span>
+          ) : ticketType.available <= 5 ? (
+            <span className="ml-2 font-semibold text-amber-600 dark:text-amber-400">
+              Only {ticketType.available} left!
+            </span>
           ) : (
             <span className="ml-2">{ticketType.available} left</span>
           )}

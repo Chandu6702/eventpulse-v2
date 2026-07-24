@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi } from '../api/endpoints';
 import { formatDateTime, formatPrice } from '../utils/format';
-import { Badge, EmptyState, Spinner } from '../components/ui';
+import { Badge, EmptyState, Pager, Spinner } from '../components/ui';
 
 export function MyOrdersPage() {
+  const [page, setPage] = useState(0);
   const { data, isPending } = useQuery({
-    queryKey: ['orders'],
-    queryFn: () => ordersApi.mine(),
+    queryKey: ['orders', page],
+    queryFn: () => ordersApi.mine(page),
+    placeholderData: (previous) => previous,
   });
 
   if (isPending) {
@@ -46,6 +49,7 @@ export function MyOrdersPage() {
           ))}
         </ul>
       )}
+      <Pager page={data?.page ?? 0} totalPages={data?.totalPages ?? 1} onChange={setPage} />
     </div>
   );
 }

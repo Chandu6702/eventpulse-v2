@@ -2,10 +2,13 @@ package com.eventpulse.user;
 
 import java.util.UUID;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eventpulse.common.exception.BadRequestException;
 import com.eventpulse.common.exception.NotFoundException;
+import com.eventpulse.user.dto.ChangePasswordRequest;
 import com.eventpulse.user.dto.UpdateProfileRequest;
 import com.eventpulse.user.dto.UserResponse;
 
@@ -13,9 +16,11 @@ import com.eventpulse.user.dto.UserResponse;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -34,6 +39,15 @@ public class UserService {
         User user = getById(userId);
         user.setName(request.name().trim());
         return UserResponse.from(user);
+    }
+
+    @Transactional
+    public void changePassword(UUID userId, ChangePasswordRequest request) {
+        User user = getById(userId);
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("Current password is incorrect");
+        }
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
     }
 
     /**

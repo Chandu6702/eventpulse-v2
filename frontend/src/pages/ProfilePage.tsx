@@ -4,7 +4,75 @@ import { useMutation } from '@tanstack/react-query';
 import { authApi, usersApi } from '../api/endpoints';
 import { problemDetail } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
-import { Badge, ErrorNote } from '../components/ui';
+import { Badge, ErrorNote, PasswordInput } from '../components/ui';
+
+function ChangePasswordCard() {
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const change = useMutation({
+    mutationFn: () => usersApi.changePassword({ currentPassword: current, newPassword: next }),
+    onSuccess: () => {
+      setCurrent('');
+      setNext('');
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    },
+    onError: (e) => setError(problemDetail(e)),
+  });
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    change.mutate();
+  }
+
+  return (
+    <form onSubmit={submit} className="card space-y-4 p-6">
+      <h2 className="font-display text-lg font-semibold">Password</h2>
+      <ErrorNote message={error} />
+      <label className="block text-sm">
+        <span className="lbl">Current password</span>
+        <PasswordInput
+          required
+          autoComplete="current-password"
+          value={current}
+          onChange={(e) => setCurrent(e.target.value)}
+        />
+      </label>
+      <label className="block text-sm">
+        <span className="lbl">New password</span>
+        <PasswordInput
+          required
+          minLength={8}
+          autoComplete="new-password"
+          value={next}
+          onChange={(e) => setNext(e.target.value)}
+        />
+      </label>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={change.isPending || !current || next.length < 8}
+          className="btn-primary"
+        >
+          {change.isPending ? 'Updating…' : 'Update password'}
+        </button>
+        {saved && (
+          <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+            Password updated ✓
+          </span>
+        )}
+      </div>
+      <p className="muted text-xs">
+        Forgot your password and locked out? Password reset by email is on the roadmap — for now,
+        an admin can reset it.
+      </p>
+    </form>
+  );
+}
 
 export function ProfilePage() {
   const { user, onAuthenticated } = useAuth();
@@ -89,6 +157,8 @@ export function ProfilePage() {
           )}
         </div>
       </form>
+
+      <ChangePasswordCard />
 
       {user.role === 'ATTENDEE' && (
         <div className="card border-orange-200 p-6 dark:border-orange-500/30">

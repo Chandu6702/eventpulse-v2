@@ -32,6 +32,8 @@ export const authApi = {
 export const usersApi = {
   updateProfile: (body: { name: string }) =>
     api.patch<User>('/users/me', body).then((r) => r.data),
+  changePassword: (body: { currentPassword: string; newPassword: string }) =>
+    api.patch('/users/me/password', body).then(() => undefined),
   becomeOrganizer: () => api.post<User>('/users/me/organizer').then((r) => r.data),
 };
 
@@ -56,6 +58,8 @@ export interface EventFilters {
   city?: string;
   category?: EventCategory | '';
   sort?: string;
+  from?: string;
+  to?: string;
   page?: number;
 }
 
@@ -68,6 +72,8 @@ export const eventsApi = {
           city: filters.city || undefined,
           category: filters.category || undefined,
           sort: filters.sort || undefined,
+          from: filters.from || undefined,
+          to: filters.to || undefined,
           page: filters.page ?? 0,
         },
       })

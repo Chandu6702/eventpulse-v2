@@ -5,7 +5,7 @@ import { eventsApi } from '../../api/endpoints';
 import { problemDetail } from '../../api/client';
 import type { EventCategory } from '../../api/types';
 import { formatDateTime } from '../../utils/format';
-import { Badge, EmptyState, ErrorNote, Spinner } from '../../components/ui';
+import { Badge, EmptyState, ErrorNote, Pager, Spinner } from '../../components/ui';
 
 const CATEGORIES: EventCategory[] = [
   'CONFERENCE',
@@ -181,10 +181,12 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
 export function OrganizerDashboardPage() {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
+  const [page, setPage] = useState(0);
 
   const { data, isPending } = useQuery({
-    queryKey: ['my-events'],
-    queryFn: () => eventsApi.mine(),
+    queryKey: ['my-events', page],
+    queryFn: () => eventsApi.mine(page),
+    placeholderData: (previous) => previous,
   });
 
   if (isPending) {
@@ -235,6 +237,7 @@ export function OrganizerDashboardPage() {
           ))}
         </ul>
       )}
+      <Pager page={data?.page ?? 0} totalPages={data?.totalPages ?? 1} onChange={setPage} />
     </div>
   );
 }
