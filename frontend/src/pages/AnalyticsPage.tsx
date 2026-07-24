@@ -209,7 +209,11 @@ function OrganizerSection() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatTile label="Events" value={String(data.totalEvents)} />
         <StatTile label="Tickets sold" value={String(data.ticketsSold)} />
-        <StatTile label="Revenue" value={formatPrice(data.revenueCents) === 'Free' ? '₹0' : formatPrice(data.revenueCents)} />
+        <StatTile
+          label="Net revenue"
+          value={data.revenueCents === 0 ? '₹0' : formatPrice(data.revenueCents)}
+          hint={data.refundedCents > 0 ? `${formatPrice(data.refundedCents)} refunded` : undefined}
+        />
         <StatTile
           label="Checked in"
           value={String(data.checkedIn)}
@@ -308,9 +312,14 @@ export function AnalyticsPage() {
           <StatTile
             label="Total spent"
             value={(data?.spentCents ?? 0) === 0 ? '₹0' : formatPrice(data?.spentCents ?? 0)}
+            hint={
+              (data?.refundedCents ?? 0) > 0
+                ? `${formatPrice(data?.refundedCents ?? 0)} refunded`
+                : undefined
+            }
           />
           <StatTile label="Events attended" value={String(data?.eventsAttended ?? 0)} />
-          <StatTile label="Upcoming tickets" value={String(data?.upcomingTickets ?? 0)} />
+          <StatTile label="Upcoming events" value={String(data?.upcomingEvents ?? 0)} />
         </div>
 
         <div className="card p-5">

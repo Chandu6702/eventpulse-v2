@@ -146,6 +146,7 @@ export interface OrganizerAnalytics {
   totalEvents: number;
   ticketsSold: number;
   revenueCents: number;
+  refundedCents: number;
   checkedIn: number;
   categoryBreakdown: CategoryCount[];
   events: EventStats[];
@@ -154,8 +155,9 @@ export interface OrganizerAnalytics {
 export interface PersonalAnalytics {
   ticketsBought: number;
   spentCents: number;
+  refundedCents: number;
   eventsAttended: number;
-  upcomingTickets: number;
+  upcomingEvents: number;
   categoryBreakdown: CategoryCount[];
 }
 

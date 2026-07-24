@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.eventpulse.AbstractIntegrationTest;
+import com.eventpulse.analytics.AnalyticsService;
 import com.eventpulse.checkin.dto.CheckInResponse;
 import com.eventpulse.common.exception.ConflictException;
 import com.eventpulse.common.exception.ForbiddenException;
@@ -37,6 +38,8 @@ class CheckInIntegrationTest extends AbstractIntegrationTest {
     private CheckInService checkInService;
     @Autowired
     private EventService eventService;
+    @Autowired
+    private AnalyticsService analyticsService;
     @Autowired
     private OrderService orderService;
     @Autowired
@@ -108,6 +111,25 @@ class CheckInIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(ticketRepository.findById(ticket.getId()).orElseThrow().getStatus())
                 .isEqualTo(TicketStatus.VOID);
+    }
+
+    @Test
+    void cancellationRefundsShowUpInAnalytics() {
+        var before = analyticsService.personal(attendee.getId());
+        assertThat(before.spentCents()).isEqualTo(100_000);
+        assertThat(before.refundedCents()).isZero();
+        assertThat(before.upcomingEvents()).isEqualTo(1);
+
+        eventService.cancel(event.getId(), organizer.getId());
+
+        var after = analyticsService.personal(attendee.getId());
+        assertThat(after.spentCents()).isZero();          // net of the refund
+        assertThat(after.refundedCents()).isEqualTo(100_000);
+        assertThat(after.upcomingEvents()).isZero();      // its ticket is void now
+
+        var org = analyticsService.organizer(organizer.getId());
+        assertThat(org.revenueCents()).isZero();
+        assertThat(org.refundedCents()).isEqualTo(100_000);
     }
 
     @Test

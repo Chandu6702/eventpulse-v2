@@ -80,10 +80,21 @@ public class AnalyticsService {
                 (rs, i) -> new CategoryCount(rs.getString("category"), rs.getLong("sold")),
                 organizerId);
 
+        // Money returned to attendees: confirmed orders for events this
+        // organizer later cancelled. (Orders are the source of truth for money.)
+        Long refunded = jdbc.queryForObject("""
+                select coalesce(sum(o.total_cents), 0)
+                from orders o
+                join events e on e.id = o.event_id
+                where e.organizer_id = ? and o.status = 'CONFIRMED' and e.status = 'CANCELLED'
+                """,
+                Long.class, organizerId);
+
         return new OrganizerAnalytics(
                 events.size(),
                 events.stream().mapToLong(EventStats::sold).sum(),
                 events.stream().mapToLong(EventStats::revenueCents).sum(),
+                refunded == null ? 0 : refunded,
                 events.stream().mapToLong(EventStats::checkedIn).sum(),
                 categories,
                 events);
@@ -97,7 +108,7 @@ public class AnalyticsService {
                 select e.id as event_id, cast(t.created_at as date) as day, count(*) as sold
                 from events e
                 join ticket_types tt on tt.event_id = e.id
-                join tickets t on t.ticket_type_id = tt.id
+                join tickets t on t.ticket_type_id = tt.id and t.status <> 'VOID'
                 where e.organizer_id = ? and t.created_at > now() - interval '14 days'
                 group by e.id, day
                 order by day
@@ -120,14 +131,23 @@ public class AnalyticsService {
         Long bought = jdbc.queryForObject(
                 "select count(*) from tickets where owner_id = ? and status <> 'VOID'",
                 Long.class, userId);
-        Long spent = jdbc.queryForObject(
+        Long grossSpent = jdbc.queryForObject(
                 "select coalesce(sum(total_cents), 0) from orders where user_id = ? and status = 'CONFIRMED'",
+                Long.class, userId);
+        // Refunds: confirmed orders whose event was later cancelled.
+        Long refunded = jdbc.queryForObject("""
+                select coalesce(sum(o.total_cents), 0)
+                from orders o
+                join events e on e.id = o.event_id
+                where o.user_id = ? and o.status = 'CONFIRMED' and e.status = 'CANCELLED'
+                """,
                 Long.class, userId);
         Long attended = jdbc.queryForObject(
                 "select count(distinct event_id) from tickets where owner_id = ? and status = 'CHECKED_IN'",
                 Long.class, userId);
-        Long upcoming = jdbc.queryForObject("""
-                select count(*) from tickets t
+        // Distinct future events with a live ticket, not raw ticket count.
+        Long upcomingEvents = jdbc.queryForObject("""
+                select count(distinct e.id) from tickets t
                 join events e on e.id = t.event_id
                 where t.owner_id = ? and t.status = 'VALID' and e.starts_at > now()
                 """,
@@ -144,11 +164,14 @@ public class AnalyticsService {
                 (rs, i) -> new CategoryCount(rs.getString("category"), rs.getLong("bought")),
                 userId);
 
+        long gross = grossSpent == null ? 0 : grossSpent;
+        long refund = refunded == null ? 0 : refunded;
         return new PersonalAnalytics(
                 bought == null ? 0 : bought,
-                spent == null ? 0 : spent,
+                gross - refund,
+                refund,
                 attended == null ? 0 : attended,
-                upcoming == null ? 0 : upcoming,
+                upcomingEvents == null ? 0 : upcomingEvents,
                 categories);
     }
 }
