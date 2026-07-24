@@ -180,12 +180,15 @@ public class EventService {
     public EventDetailResponse cancel(UUID eventId, UUID organizerId) {
         Event event = ownedEvent(eventId, organizerId);
         event.cancel();
+        // Map while the entity is still managed: the bulk void below clears
+        // the persistence context, after which lazy fields cannot load.
+        EventDetailResponse response = EventDetailResponse.from(event);
         // A cancelled event must not leave live tickets behind: holders see
         // a voided ticket with the cancellation called out (and would be
         // refunded through the payment provider). Pending orders are swept
         // by the regular expiry job.
         ticketRepository.voidActiveTicketsForEvent(eventId);
-        return EventDetailResponse.from(event);
+        return response;
     }
 
     @Transactional

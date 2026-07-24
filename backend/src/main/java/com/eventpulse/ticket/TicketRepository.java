@@ -31,8 +31,12 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     @Query("select t from Ticket t where t.code = :code")
     Optional<Ticket> findByCodeForUpdate(@Param("code") String code);
 
-    /** Event cancellation: every not-yet-used ticket becomes void in one statement. */
-    @Modifying(clearAutomatically = true)
+    /**
+     * Event cancellation: every not-yet-used ticket becomes void in one
+     * statement. Pending changes (the event's CANCELLED status) are flushed
+     * first; the stale first-level cache is cleared after.
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update Ticket t set t.status = :voided where t.event.id = :eventId and t.status = :active")
     int updateStatusForEvent(
             @Param("eventId") UUID eventId,
