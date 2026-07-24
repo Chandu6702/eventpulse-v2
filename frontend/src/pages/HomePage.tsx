@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { eventsApi } from '../api/endpoints';
@@ -69,11 +69,23 @@ export function HomePage() {
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<EventCategory | ''>('');
+  const [sort, setSort] = useState('date');
   const [page, setPage] = useState(0);
 
+  // Debounced live search: the query fires 350ms after the last keystroke,
+  // so typing does not spam the API with a request per character.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(0);
+      setSearch(q.trim());
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [q]);
+
   const { data, isPending } = useQuery({
-    queryKey: ['events', { search, category, page }],
-    queryFn: () => eventsApi.browse({ q: search, category, page }),
+    queryKey: ['events', { search, category, sort, page }],
+    queryFn: () => eventsApi.browse({ q: search, category, sort, page }),
+    placeholderData: (previous) => previous,
   });
 
   return (
@@ -89,22 +101,20 @@ export function HomePage() {
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <form
-          className="flex flex-1 gap-2"
+          className="flex-1"
           onSubmit={(e) => {
             e.preventDefault();
             setPage(0);
-            setSearch(q);
+            setSearch(q.trim());
           }}
         >
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search events or venues…"
+            placeholder="Search name, venue, city or category…"
             className="input"
+            aria-label="Search events"
           />
-          <button type="submit" className="btn-primary">
-            Search
-          </button>
         </form>
         <select
           value={category}
@@ -112,13 +122,27 @@ export function HomePage() {
             setPage(0);
             setCategory(e.target.value as EventCategory | '');
           }}
-          className="input sm:w-44"
+          className="input sm:w-40"
+          aria-label="Filter by category"
         >
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>
               {c === '' ? 'All categories' : c.charAt(0) + c.slice(1).toLowerCase()}
             </option>
           ))}
+        </select>
+        <select
+          value={sort}
+          onChange={(e) => {
+            setPage(0);
+            setSort(e.target.value);
+          }}
+          className="input sm:w-40"
+          aria-label="Sort events"
+        >
+          <option value="date">Soonest first</option>
+          <option value="newest">Recently added</option>
+          <option value="name">Name A–Z</option>
         </select>
       </div>
 

@@ -24,6 +24,7 @@ import com.eventpulse.event.dto.EventDetailResponse;
 import com.eventpulse.event.dto.EventSummaryResponse;
 import com.eventpulse.event.dto.TicketTypeResponse;
 import com.eventpulse.event.dto.UpdateEventRequest;
+import com.eventpulse.ticket.TicketRepository;
 import com.eventpulse.user.User;
 import com.eventpulse.user.UserService;
 
@@ -34,21 +35,24 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final TicketTypeRepository ticketTypeRepository;
+    private final TicketRepository ticketRepository;
     private final UserService userService;
 
     public EventService(
             EventRepository eventRepository,
             TicketTypeRepository ticketTypeRepository,
+            TicketRepository ticketRepository,
             UserService userService) {
         this.eventRepository = eventRepository;
         this.ticketTypeRepository = ticketTypeRepository;
+        this.ticketRepository = ticketRepository;
         this.userService = userService;
     }
 
     @Transactional(readOnly = true)
     public PageResponse<EventSummaryResponse> browse(
             String query, String city, EventCategory category,
-            Instant from, Instant to, int page, int size) {
+            Instant from, Instant to, String sort, int page, int size) {
         // Absent filters come back as null; Specification.allOf rejects
         // nulls, so drop them before combining.
         Specification<Event> spec = Specification.allOf(
@@ -65,9 +69,18 @@ public class EventService {
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
                 Math.clamp(size, 1, MAX_PAGE_SIZE),
-                Sort.by("startsAt").ascending());
+                sortFor(sort));
 
         return PageResponse.from(eventRepository.findAll(spec, pageable), EventSummaryResponse::from);
+    }
+
+    /** Catalogue sort options; anything unknown falls back to soonest-first. */
+    private static Sort sortFor(String sort) {
+        return switch (sort == null ? "" : sort) {
+            case "newest" -> Sort.by("createdAt").descending();
+            case "name" -> Sort.by("title").ascending();
+            default -> Sort.by("startsAt").ascending();
+        };
     }
 
     @Transactional(readOnly = true)
@@ -167,6 +180,11 @@ public class EventService {
     public EventDetailResponse cancel(UUID eventId, UUID organizerId) {
         Event event = ownedEvent(eventId, organizerId);
         event.cancel();
+        // A cancelled event must not leave live tickets behind: holders see
+        // a voided ticket with the cancellation called out (and would be
+        // refunded through the payment provider). Pending orders are swept
+        // by the regular expiry job.
+        ticketRepository.voidActiveTicketsForEvent(eventId);
         return EventDetailResponse.from(event);
     }
 

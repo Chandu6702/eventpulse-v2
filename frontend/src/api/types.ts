@@ -84,6 +84,7 @@ export interface Ticket {
   code: string;
   eventId: string;
   eventTitle: string;
+  eventStatus: EventStatus;
   venue: string;
   startsAt: string;
   ticketTypeName: string;

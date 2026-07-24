@@ -53,6 +53,12 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
             Checked in {formatDateTime(ticket.checkedInAt)}
           </p>
         )}
+        {ticket.eventStatus === 'CANCELLED' && (
+          <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+            This event was cancelled by the organizer — the ticket is no longer
+            valid and your payment will be refunded.
+          </p>
+        )}
       </div>
     </div>
   );

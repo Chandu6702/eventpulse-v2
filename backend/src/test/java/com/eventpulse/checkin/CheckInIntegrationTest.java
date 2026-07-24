@@ -19,6 +19,7 @@ import com.eventpulse.common.exception.ForbiddenException;
 import com.eventpulse.event.Event;
 import com.eventpulse.event.EventCategory;
 import com.eventpulse.event.EventRepository;
+import com.eventpulse.event.EventService;
 import com.eventpulse.event.TicketType;
 import com.eventpulse.order.OrderService;
 import com.eventpulse.order.dto.CreateOrderRequest;
@@ -34,6 +35,8 @@ class CheckInIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private CheckInService checkInService;
+    @Autowired
+    private EventService eventService;
     @Autowired
     private OrderService orderService;
     @Autowired
@@ -97,6 +100,14 @@ class CheckInIntegrationTest extends AbstractIntegrationTest {
         assertThatThrownBy(() ->
                 checkInService.checkIn(ticket.getCode(), event.getId(), otherOrganizer.getId()))
                 .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void cancellingAnEventVoidsItsTickets() {
+        eventService.cancel(event.getId(), organizer.getId());
+
+        assertThat(ticketRepository.findById(ticket.getId()).orElseThrow().getStatus())
+                .isEqualTo(TicketStatus.VOID);
     }
 
     @Test

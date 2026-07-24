@@ -47,9 +47,10 @@ public class EventController {
             @RequestParam(required = false) EventCategory category,
             @RequestParam(required = false) Instant from,
             @RequestParam(required = false) Instant to,
+            @RequestParam(defaultValue = "date") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
-        return eventService.browse(q, city, category, from, to, page, size);
+        return eventService.browse(q, city, category, from, to, sort, page, size);
     }
 
     @GetMapping("/{eventId}")

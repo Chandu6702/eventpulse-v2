@@ -52,7 +52,7 @@ class EventCatalogueIntegrationTest extends AbstractIntegrationTest {
     @Test
     void browseWithNoFiltersReturnsPublishedEvents() {
         PageResponse<EventSummaryResponse> page =
-                eventService.browse(null, null, null, null, null, 0, 50);
+                eventService.browse(null, null, null, null, null, null, 0, 50);
 
         assertThat(page.content()).extracting(EventSummaryResponse::title).contains(title);
     }
@@ -76,11 +76,11 @@ class EventCatalogueIntegrationTest extends AbstractIntegrationTest {
     @Test
     void browseWithFiltersMatchesAndExcludes() {
         PageResponse<EventSummaryResponse> match =
-                eventService.browse("browse test", "Chennai", EventCategory.MEETUP, null, null, 0, 50);
+                eventService.browse("browse test", "Chennai", EventCategory.MEETUP, null, null, null, 0, 50);
         assertThat(match.content()).extracting(EventSummaryResponse::title).contains(title);
 
         PageResponse<EventSummaryResponse> noMatch =
-                eventService.browse(null, "Nowhere City", null, null, null, 0, 50);
+                eventService.browse(null, "Nowhere City", null, null, null, null, 0, 50);
         assertThat(noMatch.content()).extracting(EventSummaryResponse::title).doesNotContain(title);
     }
 }

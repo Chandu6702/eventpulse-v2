@@ -55,6 +55,7 @@ export interface EventFilters {
   q?: string;
   city?: string;
   category?: EventCategory | '';
+  sort?: string;
   page?: number;
 }
 
@@ -66,6 +67,7 @@ export const eventsApi = {
           q: filters.q || undefined,
           city: filters.city || undefined,
           category: filters.category || undefined,
+          sort: filters.sort || undefined,
           page: filters.page ?? 0,
         },
       })
