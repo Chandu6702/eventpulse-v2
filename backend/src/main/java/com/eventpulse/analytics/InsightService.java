@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.anthropic.client.AnthropicClient;
 import com.anthropic.client.okhttp.AnthropicOkHttpClient;
@@ -88,11 +89,35 @@ public class InsightService {
                     : askClaude(system, user);
             return text.isBlank() ? Optional.empty() : Optional.of(text);
         } catch (Exception e) {
-            // Logged loud enough to diagnose a bad key/model without breaking
-            // the dashboard, which just shows numbers when this returns empty.
-            log.warn("AI insight generation failed (provider={}): {}", effectiveProvider(), e.toString());
+            log.warn("AI insight generation failed (provider={}): {}", effectiveProvider(), describe(e));
             return Optional.empty();
         }
+    }
+
+    /**
+     * A live one-line check the /ai-status endpoint uses so a misconfigured
+     * key or model can be diagnosed from the browser instead of the logs.
+     */
+    public String diagnose() {
+        if (!enabled()) {
+            return "disabled — no app.ai.api-key set";
+        }
+        try {
+            String reply = "gemini".equalsIgnoreCase(effectiveProvider())
+                    ? askGemini("Reply with the single word: ok", "ping")
+                    : askClaude("Reply with the single word: ok", "ping");
+            return reply.isBlank() ? "reachable but returned no text" : "ok";
+        } catch (Exception e) {
+            return describe(e);
+        }
+    }
+
+    /** RestClient errors carry the provider's real error body — surface it. */
+    private static String describe(Exception e) {
+        if (e instanceof RestClientResponseException http) {
+            return http.getStatusCode() + " " + http.getResponseBodyAsString();
+        }
+        return e.toString();
     }
 
     private String askClaude(String system, String user) {
@@ -111,7 +136,7 @@ public class InsightService {
 
     /** Plain REST call — Google's free-tier generateContent endpoint. */
     private String askGemini(String system, String user) throws Exception {
-        String geminiModel = model.isBlank() ? "gemini-2.5-flash" : model;
+        String geminiModel = model.isBlank() ? "gemini-2.0-flash" : model;
         Map<String, Object> body = Map.of(
                 "systemInstruction", Map.of("parts", new Object[] { Map.of("text", system) }),
                 "contents", new Object[] {

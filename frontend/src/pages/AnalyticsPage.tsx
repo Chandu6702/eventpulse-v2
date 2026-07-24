@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { analyticsApi } from '../api/endpoints';
@@ -286,6 +286,17 @@ function OrganizerSection() {
 export function AnalyticsPage() {
   const { user } = useAuth();
   const isOrganizer = !!user && user.role !== 'ATTENDEE';
+
+  // In dev, log why AI insights are (not) showing — "ok" means they will,
+  // anything else is the reason (bad key, model, quota). Console only.
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      analyticsApi
+        .aiStatus()
+        .then((s) => console.info('[EventPulse] AI insight status:', s))
+        .catch(() => undefined);
+    }
+  }, []);
 
   const { data, isPending } = useQuery({
     queryKey: ['analytics', 'me'],

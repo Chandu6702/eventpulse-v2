@@ -54,4 +54,17 @@ public class AnalyticsController {
                 .map(text -> ResponseEntity.ok(new Insight(text)))
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
+
+    /**
+     * Diagnostic for the AI layer: runs a live one-word test call and reports
+     * whether it worked, so a misconfigured key or model is visible from the
+     * browser. "ok" means insights will appear; anything else is the reason.
+     */
+    @GetMapping("/ai-status")
+    public AiStatus aiStatus() {
+        return new AiStatus(insightService.enabled(), insightService.diagnose());
+    }
+
+    public record AiStatus(boolean enabled, String status) {
+    }
 }

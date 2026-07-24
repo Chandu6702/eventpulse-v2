@@ -42,6 +42,10 @@ export const usersApi = {
 export const analyticsApi = {
   personal: () => api.get<PersonalAnalytics>('/analytics/me').then((r) => r.data),
   organizer: () => api.get<OrganizerAnalytics>('/analytics/organizer').then((r) => r.data),
+  aiStatus: () =>
+    api
+      .get<{ enabled: boolean; status: string }>('/analytics/ai-status')
+      .then((r) => r.data),
   // 204 = AI insights not configured on the server; callers hide the card.
   personalInsight: () =>
     api.get<Insight>('/analytics/me/insight').then((r) => (r.status === 204 ? null : r.data)),
