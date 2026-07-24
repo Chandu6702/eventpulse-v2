@@ -99,7 +99,7 @@ export function Layout() {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/85 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/85">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
           <Link to="/" className="flex shrink-0 items-center gap-2" onClick={() => setMenuOpen(false)}>
             <Logo />
             <span className="font-display text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -107,11 +107,11 @@ export function Layout() {
             </span>
           </Link>
 
-          <nav className="hidden flex-1 items-center gap-1 md:flex">
+          <nav className="ml-2 hidden flex-1 items-center gap-1.5 md:flex lg:ml-6">
             {links.map((link) => renderLink(link))}
           </nav>
 
-          <div className="ml-auto flex shrink-0 items-center gap-1.5 md:ml-0">
+          <div className="ml-auto flex shrink-0 items-center gap-2 md:ml-0">
             <ThemeToggle />
             {user ? (
               <>
