@@ -149,40 +149,37 @@ function CategoryBars({ data, unit }: { data: CategoryCount[]; unit: string }) {
 }
 
 function InsightCard({ queryKey, fetcher }: { queryKey: string; fetcher: () => Promise<{ insight: string } | null> }) {
-  const { data, isPending } = useQuery({
+  const { data } = useQuery({
     queryKey: ['analytics', queryKey, 'insight'],
     queryFn: fetcher,
     staleTime: 5 * 60_000,
     retry: false,
   });
 
-  // null = AI not configured server-side; the dashboard is numbers-only.
-  if (!isPending && !data) {
-    return null;
-  }
-
+  // Render nothing until real insight arrives — no key (or a failed call)
+  // returns null, so the card simply never appears instead of flashing in
+  // and out. When configured, it fades in a moment after the numbers.
   const bullets = (data?.insight ?? '')
     .split('\n')
     .map((line) => line.replace(/^[\s•*-]+/, '').trim())
     .filter(Boolean);
+  if (bullets.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="card border-orange-200 p-5 dark:border-orange-500/30">
+    <div className="card fade-up border-orange-200 p-5 dark:border-orange-500/30">
       <h3 className="font-display flex items-center gap-2 text-sm font-semibold">
         <span className="accent">✦</span> AI insight
       </h3>
-      {isPending ? (
-        <p className="muted mt-2 text-sm">Reading your numbers…</p>
-      ) : (
-        <ul className="mt-2 space-y-1.5 text-sm text-zinc-700 dark:text-zinc-300">
-          {bullets.map((bullet, i) => (
-            <li key={i} className="flex gap-2">
-              <span className="accent shrink-0">–</span>
-              {bullet}
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="mt-2 space-y-1.5 text-sm text-zinc-700 dark:text-zinc-300">
+        {bullets.map((bullet, i) => (
+          <li key={i} className="flex gap-2">
+            <span className="accent shrink-0">–</span>
+            {bullet}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

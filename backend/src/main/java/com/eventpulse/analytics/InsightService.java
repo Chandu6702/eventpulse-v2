@@ -51,6 +51,23 @@ public class InsightService {
     }
 
     /**
+     * A recognizable key prefix wins over the configured provider, so a Gemini
+     * key works even when AI_PROVIDER was left at its default. Google keys
+     * start with "AIza", Anthropic keys with "sk-ant".
+     */
+    private String effectiveProvider() {
+        if (apiKey != null) {
+            if (apiKey.startsWith("AIza")) {
+                return "gemini";
+            }
+            if (apiKey.startsWith("sk-ant")) {
+                return "anthropic";
+            }
+        }
+        return provider;
+    }
+
+    /**
      * Turns a stats payload into 3-5 short, actionable observations.
      * Failures degrade to "no insight" — never to a broken dashboard.
      */
@@ -66,12 +83,14 @@ public class InsightService {
                     + "and one concrete suggestion. No preamble, no headings — just the bullets.";
             String user = "Current statistics:\n" + objectMapper.writeValueAsString(stats);
 
-            String text = "gemini".equalsIgnoreCase(provider)
+            String text = "gemini".equalsIgnoreCase(effectiveProvider())
                     ? askGemini(system, user)
                     : askClaude(system, user);
             return text.isBlank() ? Optional.empty() : Optional.of(text);
         } catch (Exception e) {
-            log.warn("AI insight generation failed", e);
+            // Logged loud enough to diagnose a bad key/model without breaking
+            // the dashboard, which just shows numbers when this returns empty.
+            log.warn("AI insight generation failed (provider={}): {}", effectiveProvider(), e.toString());
             return Optional.empty();
         }
     }
