@@ -84,14 +84,7 @@ scanners to volunteers who shouldn't have dashboard access.
 `event_staff(event_id, user_id)`); check-in authorizes "organizer OR staff
 of this event"; organizers invite staff by email from the manage page.
 
-## 7. API hardening  `~1 day`
-
-- **Rate limiting** on `/auth/*` (Bucket4j filter, per-IP token bucket) —
-  stops credential stuffing.
-- **OpenAPI spec** via springdoc — free interactive docs at
-  `/swagger-ui.html`, and the frontend types could be generated from it.
-
-## 8. Observability  `~1 day`
+## 7. Observability  `~1 day`
 
 Actuator already exposes metrics; wire Micrometer → Prometheus + a Grafana
 dashboard (bookings/min, hold-expiry rate, check-in latency, 4xx/5xx). The
@@ -107,5 +100,12 @@ rotating refresh tokens with reuse detection · waitlists with locked FIFO
 promotion · gate-scoped 3-way check-in (hardware scanner / phone camera /
 manual) · analytics dashboard with per-day sales · AI insights switchable
 between Claude and Gemini's free tier (204 without a key) · attendee →
-organizer upgrade · browser-compressed cover uploads · light/dark theming,
-responsive to phones.
+organizer upgrade · browser-compressed cover uploads · per-IP token-bucket
+rate limiting on the auth endpoints (Bucket4j) · interactive OpenAPI docs at
+`/swagger-ui.html` (springdoc) · light/dark theming, responsive to phones.
+
+**Next on the rate limiter:** the buckets live in an in-process map, which is
+correct for the single-instance deployment this ships as. Behind several
+instances the limit would be enforced per-instance; the production answer is a
+shared bucket in Redis — Bucket4j ships a Redis/Lettuce backend, so the filter
+logic stays the same and only the `Bucket` construction changes.

@@ -63,11 +63,12 @@ flowchart LR
 | Deadlocks on multi-item orders | Items are processed in deterministic ticket-type order in every transaction. |
 | Same QR scanned at two gates | Locked ticket lookup — exactly one scan wins, the other gets the original check-in time. Scans are also scoped to the gate's event, so a valid ticket for the hall next door is refused without being consumed. |
 | Stolen refresh tokens | Tokens are opaque, stored as SHA-256 hashes, rotated on every use; reusing a rotated token revokes the whole session family. |
+| Credential stuffing / brute force | Per-IP token-bucket throttle (Bucket4j) on `login` and `register`; a drained bucket returns `429` with a `Retry-After`. |
 | Sold-out demand | Waitlist with row-locked FIFO promotion when inventory is released. |
 
 ## Stack
 
-**Backend** Java 21 · Spring Boot 4 · Spring Security (OAuth2 resource server, HS256) · Spring Data JPA · PostgreSQL 17 · Flyway · Anthropic SDK (optional AI insights)
+**Backend** Java 21 · Spring Boot 4 · Spring Security (OAuth2 resource server, HS256) · Spring Data JPA · PostgreSQL 17 · Flyway · Bucket4j (auth rate limiting) · springdoc OpenAPI (Swagger UI) · Anthropic SDK (optional AI insights)
 **Frontend** React 19 · TypeScript · Vite · TanStack Query · Tailwind CSS 4 · qr-scanner (camera check-in)
 **Testing** JUnit 5 · Testcontainers (real PostgreSQL in tests)
 **Infra** Docker · GitHub Actions · Terraform (AWS ECS Fargate + RDS + ALB — [validated but intentionally not deployed](infra/terraform/README.md))
@@ -155,6 +156,10 @@ detection, double-scan rejection.
 | Organizer | `POST /events` · `PATCH /events/{id}` · `POST /events/{id}/publish` · `/cancel` · ticket-type CRUD · `GET /events/mine` |
 | Booking | `POST /orders` (Idempotency-Key) · `POST /orders/{id}/confirm` · `/cancel` · `GET /orders` |
 | Tickets | `GET /tickets` · `POST /check-in` · `POST /ticket-types/{id}/waitlist` |
+
+Interactive API docs (springdoc OpenAPI) are served at **`/swagger-ui.html`**
+once the backend is running — the *Authorize* button takes a bearer access
+token so you can exercise the protected endpoints from the browser.
 
 Design decisions and trade-offs are documented in [docs/DESIGN.md](docs/DESIGN.md).
 

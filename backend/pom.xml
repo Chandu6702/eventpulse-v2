@@ -81,6 +81,18 @@
 			<version>2.34.0</version>
 		</dependency>
 		<dependency>
+			<!-- Interactive API docs at /swagger-ui.html (3.x line targets Spring Boot 4) -->
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+		<dependency>
+			<!-- Token-bucket rate limiting on the auth endpoints (pure library, no Spring coupling) -->
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>8.13.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator-test</artifactId>
 			<scope>test</scope>

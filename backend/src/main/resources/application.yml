@@ -36,6 +36,12 @@ app:
       secret: ${JWT_SECRET:dev-only-signing-secret-change-me-0123456789abcdef}
       access-token-ttl: ${JWT_ACCESS_TTL:15m}
       refresh-token-ttl: ${JWT_REFRESH_TTL:30d}
+    # Per-IP throttle on /auth/login and /auth/register (credential-stuffing
+    # defence). capacity requests per refill-period; refills smoothly.
+    rate-limit:
+      enabled: ${RATE_LIMIT_ENABLED:true}
+      capacity: ${RATE_LIMIT_CAPACITY:10}
+      refill-period: ${RATE_LIMIT_REFILL_PERIOD:1m}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   booking:
