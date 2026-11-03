@@ -41,8 +41,26 @@ async function refreshAccessToken(): Promise<string | null> {
   return refreshPromise;
 }
 
+const MAX_COLD_RETRIES = 3;
+
 api.interceptors.response.use(undefined, async (error: AxiosError) => {
   const original = error.config;
+
+  // Cold-start resilience: a free-tier backend spins down when idle, and the
+  // first request(s) after it wakes can be dropped (connection closed / timeout)
+  // with no HTTP response. Retry those a few times with backoff so a wake-up
+  // reads as a brief load, not a failure. Real HTTP responses are never retried
+  // here — they fall through to the 401/refresh handling below.
+  if (original && !error.response) {
+    const r = original as typeof original & { __coldRetry?: number };
+    const attempt = (r.__coldRetry ?? 0) + 1;
+    r.__coldRetry = attempt;
+    if (attempt <= MAX_COLD_RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
+      return api.request(original);
+    }
+  }
+
   if (
     error.response?.status === 401 &&
     original &&
